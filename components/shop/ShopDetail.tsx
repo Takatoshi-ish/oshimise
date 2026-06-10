@@ -70,7 +70,7 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
           <div className="mt-2 flex gap-2 flex-wrap items-center">
             {shop.genre && (
               <span className="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-coral-50 text-coral-700 font-medium">
-                🍴 {shop.genre}
+                {shop.genre}
               </span>
             )}
             {priceText(shop.priceLevel) && (
@@ -80,7 +80,7 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
             )}
             {(shop.area || shop.city || shop.pref) && (
               <span className="text-xs text-ink-500">
-                📍 {shop.area || shop.city || shop.pref}
+                {shop.area || shop.city || shop.pref}
               </span>
             )}
           </div>

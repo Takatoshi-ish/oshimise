@@ -52,7 +52,7 @@ export function PlaceSearch({ sessionToken, onSelect }: Props) {
         type="text"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="例: 渋谷ラーメン"
+        placeholder="例: 下北沢の書店、渋谷のカフェ"
         className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
       />
       {loading && (

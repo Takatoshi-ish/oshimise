@@ -27,23 +27,38 @@ function priceText(level: number | null): string {
   return '¥'.repeat(Math.min(level, 4));
 }
 
+// Stable-ish color picker so the same shop gets the same monogram tint each render.
+const MONOGRAM_PALETTE = [
+  'from-coral-100 to-coral-50 text-coral-700',
+  'from-sea-100 to-sea-50 text-sea-700',
+  'from-cream-200 to-cream-100 text-ink-600',
+] as const;
+
+function monogramTint(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  return MONOGRAM_PALETTE[Math.abs(hash) % MONOGRAM_PALETTE.length];
+}
+
 export function ShopList({ shops, loading, onPostClick }: Props) {
   if (loading) {
     return <p className="text-sm text-ink-400">読み込み中...</p>;
   }
   if (shops.length === 0) {
     return (
-      <div className="rounded-3xl bg-gradient-to-br from-white to-cream-50 shadow-card p-10 text-center space-y-3">
-        <p className="text-5xl" aria-hidden>✨</p>
+      <div className="rounded-2xl bg-white border border-cream-100 p-10 text-center space-y-3">
+        <p className="text-4xl" aria-hidden>✨</p>
         <p className="text-lg font-bold text-ink-900">
           まだお店がありません
         </p>
-        <p className="text-sm text-ink-500">最初の1店を投稿してみましょう!</p>
+        <p className="text-sm text-ink-500">
+          書店・カフェ・雑貨…なんでも。最初の1店をシェアしてみよう
+        </p>
         {onPostClick && (
           <button
             type="button"
             onClick={onPostClick}
-            className="mt-2 rounded-full bg-gradient-to-br from-coral-500 to-coral-600 text-white px-6 py-3 text-sm font-semibold shadow-soft hover:shadow-cardHover transition-all"
+            className="mt-2 rounded-full bg-coral-500 hover:bg-coral-600 text-white px-6 py-2.5 text-sm font-semibold transition-colors"
           >
             ＋ お店を投稿する
           </button>
@@ -53,32 +68,35 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
   }
   return (
     <div className="space-y-3">
-      <div className="flex items-baseline gap-1.5 text-xs">
+      <div className="flex items-baseline gap-1.5 text-xs px-1">
         <span className="text-ink-400 font-medium">全</span>
         <span className="text-ink-900 font-bold text-sm">{shops.length}</span>
         <span className="text-ink-400 font-medium">件</span>
       </div>
-      <ul className="space-y-2.5">
+      <ul className="space-y-2">
         {shops.map((s) => (
           <li key={s.id}>
             <Link
               href={`/shops/${s.id}`}
-              className="group block rounded-2xl bg-white shadow-card hover:shadow-cardHover transition-all hover:-translate-y-0.5 p-3.5 flex gap-3"
+              className="group block rounded-2xl bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50/30 transition-colors p-3.5 flex gap-3"
             >
               {s.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={s.thumbnailUrl}
                   alt=""
-                  className="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
+                  className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cream-100 to-cream-200 flex-shrink-0 flex items-center justify-center text-3xl">
-                  🍴
+                <div
+                  className={`w-16 h-16 rounded-xl bg-gradient-to-br ${monogramTint(s.id)} flex-shrink-0 flex items-center justify-center text-xl font-extrabold`}
+                  aria-hidden
+                >
+                  {s.name.slice(0, 1)}
                 </div>
               )}
               <div className="flex-1 min-w-0 py-0.5 flex flex-col justify-center">
-                <p className="font-bold text-ink-900 truncate group-hover:text-coral-700 transition-colors">
+                <p className="font-semibold text-ink-900 truncate group-hover:text-coral-700 transition-colors">
                   {s.name}
                 </p>
                 <div className="flex gap-1.5 items-center mt-1.5 flex-wrap">
@@ -98,7 +116,7 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
                 </div>
                 {(s.pref || s.city || s.area) && (
                   <p className="mt-1.5 text-[11px] text-ink-400 truncate">
-                    📍 {s.area || s.city || s.pref}
+                    {s.area || s.city || s.pref}
                   </p>
                 )}
               </div>

@@ -96,7 +96,7 @@ export function MergeView({
         </div>
         <div className="px-5 py-5 space-y-4">
           <div className="rounded-2xl bg-white shadow-soft border border-cream-100 px-4 py-3 text-sm">
-            <div className="font-semibold text-ink-900">🍴 {shop.name}</div>
+            <div className="font-semibold text-ink-900">{shop.name}</div>
             <div className="text-xs text-ink-500 mt-1 flex gap-2 flex-wrap">
               {shop.genre && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-coral-50 text-coral-700 font-medium">

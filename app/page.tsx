@@ -70,18 +70,20 @@ export default function HomePage() {
       <section
         className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-cream-100 md:overflow-y-auto`}
       >
-        {/* PC top bar: encouraging text + post CTA */}
+        {/* PC top bar: tagline + post CTA */}
         <div className="hidden md:flex sticky top-0 z-10 bg-cream-50/85 backdrop-blur-md border-b border-cream-100 px-6 py-3.5 justify-between items-center">
           <div className="flex flex-col leading-tight">
-            <p className="text-base font-bold text-ink-900">今日も推し店を探そう</p>
-            <p className="text-xs text-ink-400 font-medium">
-              みんなのオススメから、次に行きたいお店を見つけて
+            <p className="text-base font-bold text-ink-900">
+              みんなで推し店を集めよう
+            </p>
+            <p className="text-xs text-ink-400 font-medium mt-0.5">
+              書店・カフェ・雑貨…道中の発見をシェア
             </p>
           </div>
           <button
             type="button"
             onClick={openCompose}
-            className="rounded-full bg-gradient-to-br from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-5 py-2.5 text-sm font-semibold shadow-soft hover:shadow-cardHover transition-all"
+            className="rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-2.5 text-sm font-semibold transition-colors"
           >
             ＋ お店を投稿
           </button>
@@ -109,11 +111,11 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Mobile FAB — coral gradient pill */}
+      {/* Mobile FAB — flat coral pill */}
       <button
         type="button"
         onClick={openCompose}
-        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-gradient-to-br from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-5 py-3.5 shadow-cardHover font-semibold text-base transition-all"
+        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-3.5 shadow-card font-semibold text-base transition-colors"
         aria-label="お店を投稿"
       >
         ＋ 投稿

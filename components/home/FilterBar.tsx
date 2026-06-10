@@ -44,7 +44,7 @@ export function FilterBar({ filters, onChange }: Props) {
           type="search"
           value={filters.q}
           onChange={(e) => onChange({ ...filters, q: e.target.value })}
-          placeholder="店名・料理・食材で検索"
+          placeholder="店名・キーワードで検索"
           className="w-full rounded-full border border-cream-200 bg-white pl-11 pr-4 py-3 text-sm shadow-soft focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
         />
       </div>

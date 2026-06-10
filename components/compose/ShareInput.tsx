@@ -16,7 +16,7 @@ export function ShareInput({ value, onChange }: Props) {
         onChange={(e) => onChange(e.target.value)}
         rows={3}
         maxLength={200}
-        placeholder="なぜ良い？ 誰に・どんな時におすすめ？ 例：深夜営業でスープが絶品のラーメン。一人でも入りやすい"
+        placeholder="なぜ良い？ 誰に・どんな時におすすめ？ 例：店主さんが本好きで話が弾む、買い周りの合間に寄れる雑貨屋"
         className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-3 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 resize-none"
       />
       <p className="mt-1 text-xs text-ink-400 text-right">

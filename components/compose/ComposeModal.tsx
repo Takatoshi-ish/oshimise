@@ -285,16 +285,16 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
                     {place.address}
                   </div>
                 )}
-                <div className="flex gap-2 flex-wrap mt-1.5 text-xs">
+                <div className="flex gap-2 flex-wrap mt-1.5 text-xs items-center">
                   {place.pref && (
                     <span className="text-ink-500">
-                      📍 {place.pref}
+                      {place.pref}
                       {place.city ? ` / ${place.city}` : ''}
                     </span>
                   )}
                   {place.genreSuggestion && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-coral-50 text-coral-700 font-medium">
-                      🍴 {place.genreSuggestion}
+                      {place.genreSuggestion}
                     </span>
                   )}
                 </div>

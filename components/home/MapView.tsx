@@ -125,7 +125,7 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-neutral-50 text-center p-6 gap-3">
         <p className="text-2xl" aria-hidden>🗺️</p>
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-ink-600">
           投稿された店のピンが地図に出ます
         </p>
         <p className="text-xs text-neutral-500">まだ投稿がありません</p>
@@ -185,13 +185,13 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
             <div className="text-sm min-w-48">
               <div className="font-medium">{selected.name}</div>
               <div className="text-xs text-neutral-600 mt-1 flex gap-2 flex-wrap">
-                {selected.genre && <span>🍴 {selected.genre}</span>}
+                {selected.genre && <span>{selected.genre}</span>}
                 {priceText(selected.priceLevel) && (
                   <span>{priceText(selected.priceLevel)}</span>
                 )}
                 <span>💬 {selected.shareCount}</span>
                 {(selected.area || selected.city) && (
-                  <span>📍 {selected.area || selected.city}</span>
+                  <span>{selected.area || selected.city}</span>
                 )}
               </div>
               <div className="mt-2 flex gap-3 text-xs">
