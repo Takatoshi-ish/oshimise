@@ -40,7 +40,7 @@ export default function HomePage() {
   const [composing, setComposing] = useState(false);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced fetch for shops/feed when filters change
+  // Debounced fetch for shops when filters change
   useEffect(() => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);
     fetchTimer.current = setTimeout(async () => {
@@ -78,57 +78,71 @@ export default function HomePage() {
     if (composing) window.history.back();
   };
 
+  // PC sub-tab highlight: 'map' state has no meaning on PC (map is always shown);
+  // treat it as "list" for the tab strip.
+  const pcActive: 'list' | 'feed' = tab === 'feed' ? 'feed' : 'list';
+
   return (
-    <main className="md:flex md:gap-0 md:h-[calc(100vh-49px)] pb-16 md:pb-0">
-      {/* Left pane (PC) / single tab (mobile) */}
+    <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-49px)] pb-16 md:pb-0">
+      {/* Left pane: filter + (shop list | feed) */}
       <section
-        className={`${tab === 'list' || tab === 'feed' ? 'block' : 'hidden'} md:block md:w-1/2 md:max-w-md md:border-r md:border-neutral-200 md:overflow-y-auto p-4 space-y-4`}
+        className={`${tab === 'list' || tab === 'feed' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-neutral-200 md:overflow-y-auto`}
       >
-        <FilterBar filters={filters} onChange={setFilters} />
-        {/* On PC always show list; on mobile show list or feed */}
-        <div className={`${tab === 'list' ? 'block' : 'hidden md:block'}`}>
-          <ShopList shops={shops} loading={shopsLoading} />
+        {/* PC-only top strip: sub-tabs + post button */}
+        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2 justify-between items-center">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setTab('list')}
+              className={`px-3 py-1.5 text-sm rounded ${
+                pcActive === 'list'
+                  ? 'bg-neutral-900 text-white font-medium'
+                  : 'text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              📋 さがす
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('feed')}
+              className={`px-3 py-1.5 text-sm rounded ${
+                pcActive === 'feed'
+                  ? 'bg-neutral-900 text-white font-medium'
+                  : 'text-neutral-600 hover:bg-neutral-100'
+              }`}
+            >
+              🆕 みんなの共有
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setComposing(true)}
+            className="rounded-full bg-neutral-900 text-white px-4 py-1.5 text-sm font-medium"
+          >
+            ＋ 投稿
+          </button>
         </div>
-        <div className={`${tab === 'feed' ? 'block' : 'hidden'} md:hidden`}>
-          <Feed items={feed} loading={feedLoading} />
-        </div>
-      </section>
 
-      {/* Right pane: map (md+) / mobile map tab */}
-      <section
-        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:flex-1 h-[calc(100vh-49px-64px)] md:h-auto`}
-      >
-        <MapView shops={shops} onSelect={(id) => (window.location.href = `/shops/${id}`)} />
-      </section>
-
-      {/* Feed on PC: separate section visible only when tab=feed (PC-specific layout) */}
-      {tab === 'feed' && (
-        <section className="hidden md:block md:absolute md:inset-0 md:bg-white md:overflow-y-auto md:p-6 md:z-10">
-          <div className="max-w-2xl mx-auto space-y-4">
-            <h2 className="text-lg font-bold">みんなの共有</h2>
-            <FilterBar filters={filters} onChange={setFilters} />
+        <div className="p-4 space-y-4">
+          <FilterBar filters={filters} onChange={setFilters} />
+          <div className={pcActive === 'feed' ? 'hidden' : 'block'}>
+            <ShopList shops={shops} loading={shopsLoading} />
+          </div>
+          <div className={pcActive === 'feed' ? 'block' : 'hidden'}>
             <Feed items={feed} loading={feedLoading} />
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* PC: top-right Feed button to toggle feed view */}
-      <button
-        type="button"
-        onClick={() => setTab(tab === 'feed' ? 'list' : 'feed')}
-        className="hidden md:block fixed top-2 right-32 z-20 text-xs underline text-neutral-600"
+      {/* Right pane: map (always on PC, mobile only when tab=map) */}
+      <section
+        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:w-2/5 h-[calc(100vh-49px-64px)] md:h-auto`}
       >
-        {tab === 'feed' ? '← ホームへ戻る' : '🆕 みんなの共有'}
-      </button>
-
-      {/* PC: top-right post button */}
-      <button
-        type="button"
-        onClick={() => setComposing(true)}
-        className="hidden md:block fixed top-2 right-4 z-20 rounded-full bg-neutral-900 text-white px-4 py-1.5 text-sm font-medium"
-      >
-        ＋ 投稿
-      </button>
+        <MapView
+          shops={shops}
+          onSelect={(id) => (window.location.href = `/shops/${id}`)}
+        />
+      </section>
 
       {/* Mobile FAB */}
       <button
