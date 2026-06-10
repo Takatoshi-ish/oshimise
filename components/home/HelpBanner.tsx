@@ -1,46 +1,29 @@
 'use client';
-import { useEffect, useState } from 'react';
-
-const KEY = 'oshimise:helpDismissed';
+import { useState } from 'react';
 
 export function HelpBanner() {
   const [open, setOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
-    const dismissed = localStorage.getItem(KEY) === '1';
-    setOpen(!dismissed);
-    setHydrated(true);
-  }, []);
-
-  const dismiss = () => {
-    localStorage.setItem(KEY, '1');
-    setOpen(false);
-  };
-
-  const expand = () => setOpen(true);
-
-  if (!hydrated || !open) {
+  if (!open) {
     return (
-      <div className="text-xs">
-        <button
-          type="button"
-          onClick={expand}
-          className="text-neutral-500 underline"
-        >
-          ℹ️ 使い方を見る
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-sm text-neutral-700 hover:bg-neutral-100 px-3 py-1.5 rounded border border-neutral-300 inline-flex items-center gap-1.5"
+      >
+        <span aria-hidden>ℹ️</span>
+        使い方
+      </button>
     );
   }
 
   return (
     <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm space-y-2">
       <div className="flex justify-between items-start gap-2">
-        <p className="font-medium text-sky-900">オシミセ の使い方</p>
+        <p className="font-medium text-sky-900">使い方</p>
         <button
           type="button"
-          onClick={dismiss}
+          onClick={() => setOpen(false)}
           aria-label="閉じる"
           className="text-neutral-500 text-lg leading-none px-1"
         >

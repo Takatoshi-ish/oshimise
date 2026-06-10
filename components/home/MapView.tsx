@@ -16,39 +16,101 @@ type Props = {
   onPostClick?: () => void;
 };
 
+type SavedView = { lat: number; lng: number; zoom: number };
+
+const VIEW_KEY = 'oshimise:mapView';
+const GEO_TIMEOUT_MS = 4000;
+const GEO_ZOOM = 14;
+
+function loadLastView(): SavedView | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(VIEW_KEY);
+    return raw ? (JSON.parse(raw) as SavedView) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveView(v: SavedView): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(VIEW_KEY, JSON.stringify(v));
+  } catch {
+    /* quota or disabled — ignore */
+  }
+}
+
 function priceText(level: number | null): string {
   if (level === null || level <= 0) return '';
   return '¥'.repeat(Math.min(level, 4));
 }
 
-function FitBounds({ shops }: { shops: ShopCard[] }) {
+// Save the current map view to localStorage every time the camera settles
+function ViewPersister() {
   const map = useMap();
   useEffect(() => {
     if (!map) return;
-    const pts = shops.filter(
-      (s): s is ShopCard & { lat: number; lng: number } =>
-        s.lat !== null && s.lng !== null,
-    );
-    if (pts.length === 0) {
-      map.setCenter(MAP_DEFAULT_CENTER);
-      map.setZoom(MAP_DEFAULT_ZOOM);
-      return;
-    }
-    if (pts.length === 1) {
-      map.setCenter({ lat: pts[0].lat, lng: pts[0].lng });
-      map.setZoom(15);
-      return;
-    }
-    const bounds = new google.maps.LatLngBounds();
-    pts.forEach((p) => bounds.extend({ lat: p.lat, lng: p.lng }));
-    map.fitBounds(bounds, 40);
-  }, [map, shops]);
+    const listener = map.addListener('idle', () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      if (center && typeof zoom === 'number') {
+        saveView({ lat: center.lat(), lng: center.lng(), zoom });
+      }
+    });
+    return () => listener.remove();
+  }, [map]);
   return null;
 }
 
 export function MapView({ shops, onSelect, onPostClick }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_MAPS_BROWSER_KEY;
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [initial, setInitial] = useState<SavedView | null>(null);
+
+  // Resolve initial view: geolocation → last view → app default
+  useEffect(() => {
+    const last = loadLastView();
+    const fallback: SavedView = last ?? {
+      lat: MAP_DEFAULT_CENTER.lat,
+      lng: MAP_DEFAULT_CENTER.lng,
+      zoom: MAP_DEFAULT_ZOOM,
+    };
+
+    if (!('geolocation' in navigator)) {
+      setInitial(fallback);
+      return;
+    }
+
+    let resolved = false;
+    const timeoutId = setTimeout(() => {
+      if (resolved) return;
+      resolved = true;
+      setInitial(fallback);
+    }, GEO_TIMEOUT_MS);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeoutId);
+        setInitial({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          zoom: GEO_ZOOM,
+        });
+      },
+      () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeoutId);
+        setInitial(fallback);
+      },
+      { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 60_000 },
+    );
+
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   if (!apiKey) {
     return (
@@ -58,7 +120,7 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
     );
   }
 
-  // Cold-start CTA
+  // Cold-start CTA when there are no shops yet
   if (shops.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-neutral-50 text-center p-6 gap-3">
@@ -80,6 +142,15 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
     );
   }
 
+  // Wait until the initial view is decided to avoid a flash of the default center
+  if (!initial) {
+    return (
+      <div className="flex items-center justify-center h-full text-xs text-neutral-500 bg-neutral-50">
+        現在地を取得中...
+      </div>
+    );
+  }
+
   const selected = shops.find((s) => s.id === selectedId);
   const pinnedShops = shops.filter(
     (s): s is ShopCard & { lat: number; lng: number } =>
@@ -90,13 +161,13 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
     <APIProvider apiKey={apiKey}>
       <Map
         style={{ width: '100%', height: '100%' }}
-        defaultCenter={MAP_DEFAULT_CENTER}
-        defaultZoom={MAP_DEFAULT_ZOOM}
+        defaultCenter={{ lat: initial.lat, lng: initial.lng }}
+        defaultZoom={initial.zoom}
         gestureHandling="greedy"
         disableDefaultUI={false}
         mapId="oshimise-home"
       >
-        <FitBounds shops={shops} />
+        <ViewPersister />
         {pinnedShops.map((s) => (
           <Marker
             key={s.id}
