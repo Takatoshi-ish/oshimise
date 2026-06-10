@@ -29,18 +29,21 @@ function priceText(level: number | null): string {
 
 export function ShopList({ shops, loading, onPostClick }: Props) {
   if (loading) {
-    return <p className="text-sm text-neutral-500">読み込み中...</p>;
+    return <p className="text-sm text-ink-400">読み込み中...</p>;
   }
   if (shops.length === 0) {
     return (
-      <div className="text-center py-10 text-sm text-neutral-600">
-        <p className="text-base mb-1">まだお店がありません</p>
-        <p className="mb-4">最初の1店を投稿しましょう!</p>
+      <div className="rounded-3xl bg-white shadow-card p-8 text-center space-y-3">
+        <p className="text-4xl" aria-hidden>✨</p>
+        <p className="text-base font-medium text-ink-900">
+          まだお店がありません
+        </p>
+        <p className="text-sm text-ink-500">最初の1店を投稿しましょう!</p>
         {onPostClick && (
           <button
             type="button"
             onClick={onPostClick}
-            className="rounded-lg bg-neutral-900 text-white px-5 py-3 font-medium"
+            className="rounded-full bg-coral-500 hover:bg-coral-600 text-white px-6 py-3 text-sm font-semibold shadow-soft transition-colors"
           >
             ＋ お店を投稿する
           </button>
@@ -49,45 +52,54 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
     );
   }
   return (
-    <div className="space-y-2">
-      <div className="text-xs text-neutral-500">全 {shops.length} 件</div>
+    <div className="space-y-3">
+      <div className="text-xs text-ink-400 font-medium">
+        全 <span className="text-ink-900 font-bold">{shops.length}</span> 件
+      </div>
       <ul className="space-y-3">
         {shops.map((s) => (
-        <li
-          key={s.id}
-          className="border border-neutral-200 rounded-lg p-3 flex gap-3 bg-white"
-        >
-          {s.thumbnailUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={s.thumbnailUrl}
-              alt=""
-              className="w-16 h-16 rounded object-cover flex-shrink-0"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded bg-neutral-100 flex-shrink-0 flex items-center justify-center text-2xl text-neutral-300">
-              🍴
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
+          <li key={s.id}>
             <Link
               href={`/shops/${s.id}`}
-              className="font-medium text-sm hover:underline block truncate"
+              className="block rounded-2xl bg-white shadow-card hover:shadow-cardHover transition-shadow p-3 flex gap-3"
             >
-              {s.name}
-            </Link>
-            <div className="flex gap-2 items-center text-xs text-neutral-600 mt-1 flex-wrap">
-              {s.genre && <span>🍴 {s.genre}</span>}
-              {priceText(s.priceLevel) && <span>{priceText(s.priceLevel)}</span>}
-              <span>💬 {s.shareCount}</span>
-              {(s.pref || s.city || s.area) && (
-                <span className="truncate">
-                  📍 {s.area || s.city || s.pref}
-                </span>
+              {s.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={s.thumbnailUrl}
+                  alt=""
+                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-xl bg-cream-100 flex-shrink-0 flex items-center justify-center text-3xl">
+                  🍴
+                </div>
               )}
-            </div>
-          </div>
-        </li>
+              <div className="flex-1 min-w-0 py-0.5">
+                <p className="font-semibold text-ink-900 truncate">{s.name}</p>
+                <div className="flex gap-1.5 items-center mt-1.5 flex-wrap">
+                  {s.genre && (
+                    <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full bg-coral-50 text-coral-700 font-medium">
+                      {s.genre}
+                    </span>
+                  )}
+                  {priceText(s.priceLevel) && (
+                    <span className="text-xs text-ink-500 font-medium">
+                      {priceText(s.priceLevel)}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-sea-50 text-sea-700 font-medium">
+                    💬 {s.shareCount}
+                  </span>
+                </div>
+                {(s.pref || s.city || s.area) && (
+                  <p className="mt-1.5 text-xs text-ink-400 truncate">
+                    📍 {s.area || s.city || s.pref}
+                  </p>
+                )}
+              </div>
+            </Link>
+          </li>
         ))}
       </ul>
     </div>

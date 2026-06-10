@@ -80,39 +80,46 @@ export function MergeView({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center">
-      <div className="bg-white w-full md:max-w-xl md:rounded-lg max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-neutral-200 px-4 py-3 flex justify-between items-center">
-          <h2 className="font-bold text-sm">
+    <div className="fixed inset-0 z-50 bg-ink/40 flex items-end md:items-center justify-center backdrop-blur-sm">
+      <div className="bg-cream-50 w-full md:max-w-xl md:rounded-3xl rounded-t-3xl max-h-[92vh] overflow-y-auto shadow-cardHover">
+        <div className="sticky top-0 bg-cream-50/95 backdrop-blur border-b border-cream-100 px-5 py-3.5 flex justify-between items-center">
+          <h2 className="font-bold text-sm text-ink-900">
             この店にはもう共有があります
           </h2>
           <button
             onClick={onClose}
             aria-label="閉じる"
-            className="text-2xl leading-none px-2"
+            className="text-2xl leading-none px-2 text-ink-400 hover:text-ink-600"
           >
             ×
           </button>
         </div>
-        <div className="px-4 py-4 space-y-4">
-          <div className="rounded border border-neutral-200 px-3 py-2 bg-neutral-50 text-sm">
-            <div className="font-medium">🍴 {shop.name}</div>
-            <div className="text-xs text-neutral-600 mt-0.5 flex gap-2 flex-wrap">
-              {shop.genre && <span>{shop.genre}</span>}
-              {priceText(shop.priceLevel) && <span>{priceText(shop.priceLevel)}</span>}
+        <div className="px-5 py-5 space-y-4">
+          <div className="rounded-2xl bg-white shadow-soft border border-cream-100 px-4 py-3 text-sm">
+            <div className="font-semibold text-ink-900">🍴 {shop.name}</div>
+            <div className="text-xs text-ink-500 mt-1 flex gap-2 flex-wrap">
+              {shop.genre && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-coral-50 text-coral-700 font-medium">
+                  {shop.genre}
+                </span>
+              )}
+              {priceText(shop.priceLevel) && (
+                <span className="font-medium text-ink-500">{priceText(shop.priceLevel)}</span>
+              )}
               {(shop.area || shop.city || shop.pref) && (
                 <span>📍 {shop.area || shop.city || shop.pref}</span>
               )}
             </div>
           </div>
           <div>
-            <h3 className="text-sm font-medium mb-2">
-              これまでの共有 ({existingRecommendations.length})
+            <h3 className="text-sm font-semibold text-ink-900 mb-2">
+              これまでの共有
+              <span className="ml-1.5 text-coral-600">{existingRecommendations.length}</span>
             </h3>
             <ShareList items={existingRecommendations} />
           </div>
-          <div className="border-t border-neutral-200 pt-4">
-            <h3 className="text-sm font-medium mb-3">あなたの共有を追加</h3>
+          <div className="border-t border-cream-200 pt-4">
+            <h3 className="text-sm font-semibold text-ink-900 mb-3">あなたの共有を追加</h3>
             <div className="space-y-4">
               <MemberSelect value={memberId} onChange={setMemberId} />
               <ShareInput value={comment} onChange={setComment} />
@@ -124,13 +131,13 @@ export function MergeView({
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-coral-700">{error}</p>}
 
           <button
             type="button"
             onClick={handleSubmit}
             disabled={submitting || !memberId || !comment.trim()}
-            className="w-full rounded-lg bg-neutral-900 text-white py-3 font-medium disabled:opacity-40 flex items-center justify-center gap-2"
+            className="w-full rounded-full bg-coral-500 hover:bg-coral-600 text-white py-3.5 font-semibold disabled:opacity-40 disabled:hover:bg-coral-500 flex items-center justify-center gap-2 shadow-soft transition-colors"
           >
             {submitting && <Spinner />}
             共有を追加する

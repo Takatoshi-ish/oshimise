@@ -45,19 +45,21 @@ export function PlaceSearch({ sessionToken, onSelect }: Props) {
 
   return (
     <div className="relative">
-      <label className="block text-sm font-medium mb-1">店名 *</label>
+      <label className="block text-sm font-semibold text-ink-900 mb-1.5">
+        店名 <span className="text-coral-500">*</span>
+      </label>
       <input
         type="text"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="例: 渋谷ラーメン"
-        className="w-full rounded border border-neutral-300 px-3 py-2 text-base"
+        className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
       />
       {loading && (
-        <div className="text-xs text-neutral-500 mt-1">候補を取得中...</div>
+        <div className="text-xs text-ink-400 mt-1">候補を取得中...</div>
       )}
       {suggestions.length > 0 && (
-        <ul className="mt-1 border border-neutral-200 rounded bg-white max-h-64 overflow-y-auto">
+        <ul className="mt-1.5 border border-cream-200 rounded-2xl bg-white shadow-card max-h-64 overflow-y-auto">
           {suggestions.map((s) => (
             <li key={s.placeId}>
               <button
@@ -67,7 +69,7 @@ export function PlaceSearch({ sessionToken, onSelect }: Props) {
                   setSuggestions([]);
                   setQ(s.description);
                 }}
-                className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm"
+                className="w-full text-left px-4 py-2.5 hover:bg-coral-50 text-sm transition-colors first:rounded-t-2xl last:rounded-b-2xl"
               >
                 {s.description}
               </button>

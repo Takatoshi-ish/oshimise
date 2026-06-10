@@ -31,7 +31,6 @@ export default function HomePage() {
   const [composing, setComposing] = useState(false);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced fetch for shops when filters change
   useEffect(() => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);
     fetchTimer.current = setTimeout(async () => {
@@ -48,7 +47,6 @@ export default function HomePage() {
     };
   }, [filters]);
 
-  // Browser back closes the compose modal
   useEffect(() => {
     if (!composing) return;
     window.history.pushState({ oshimiseCompose: true }, '');
@@ -67,23 +65,26 @@ export default function HomePage() {
   };
 
   return (
-    <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-49px)] pb-16 md:pb-0">
-      {/* Left pane: help + filter + shop list */}
+    <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-57px)] pb-16 md:pb-0">
+      {/* Left pane */}
       <section
-        className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-neutral-200 md:overflow-y-auto`}
+        className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-cream-100 md:overflow-y-auto`}
       >
-        {/* PC-only top strip: bigger primary action */}
-        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2.5 justify-end items-center">
+        {/* PC-only top bar: post CTA */}
+        <div className="hidden md:flex sticky top-0 z-10 bg-cream-50/90 backdrop-blur border-b border-cream-100 px-5 py-3 justify-between items-center">
+          <p className="text-xs text-ink-400 font-semibold tracking-wide uppercase">
+            探す & 集める
+          </p>
           <button
             type="button"
             onClick={openCompose}
-            className="rounded-lg bg-neutral-900 text-white px-5 py-2.5 text-base font-medium shadow-sm hover:bg-neutral-800"
+            className="rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-2.5 text-sm font-semibold shadow-soft transition-colors"
           >
             ＋ お店を投稿
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 md:p-5 space-y-5">
           <HelpBanner />
           <FilterBar filters={filters} onChange={setFilters} />
           <ShopList
@@ -94,9 +95,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Right pane: map (always on PC, mobile only when tab=map) */}
+      {/* Right pane: map */}
       <section
-        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:w-2/5 h-[calc(100vh-49px-64px)] md:h-auto`}
+        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:w-2/5 h-[calc(100vh-57px-64px)] md:h-auto`}
       >
         <MapView
           shops={shops}
@@ -105,11 +106,11 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Mobile FAB with label so it's clearly the primary action */}
+      {/* Mobile FAB */}
       <button
         type="button"
         onClick={openCompose}
-        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-neutral-900 text-white px-5 py-4 shadow-lg font-medium text-base"
+        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-3.5 shadow-cardHover font-semibold text-base transition-colors"
         aria-label="お店を投稿"
       >
         ＋ 投稿

@@ -59,22 +59,22 @@ export function PhotoUploader({ memberId, photos, onChange }: Props) {
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-1">
-        写真（任意・最大{PHOTO_LIMIT_PER_POST}枚）
+      <label className="block text-sm font-semibold text-ink-900 mb-1.5">
+        写真 <span className="text-ink-400 font-normal">（任意・最大{PHOTO_LIMIT_PER_POST}枚）</span>
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2.5">
         {photos.map((p) => (
           <div key={p.id} className="relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={p.url}
               alt=""
-              className="w-20 h-20 object-cover rounded"
+              className="w-20 h-20 object-cover rounded-2xl shadow-soft"
             />
             <button
               type="button"
               onClick={() => handleRemove(p.id)}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-neutral-700 text-white text-xs leading-none"
+              className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-ink-900 text-white text-xs leading-none shadow-soft"
               aria-label="削除"
             >
               ×
@@ -82,7 +82,7 @@ export function PhotoUploader({ memberId, photos, onChange }: Props) {
           </div>
         ))}
         {photos.length < PHOTO_LIMIT_PER_POST && (
-          <label className="w-20 h-20 border-2 border-dashed border-neutral-300 rounded flex items-center justify-center cursor-pointer text-2xl text-neutral-400 hover:bg-neutral-50">
+          <label className="w-20 h-20 border-2 border-dashed border-cream-200 hover:border-coral-300 hover:bg-coral-50 rounded-2xl flex items-center justify-center cursor-pointer text-2xl text-ink-400 hover:text-coral-500 transition-colors bg-white">
             +
             <input
               ref={inputRef}
@@ -96,9 +96,9 @@ export function PhotoUploader({ memberId, photos, onChange }: Props) {
         )}
       </div>
       {uploading && (
-        <p className="text-xs text-neutral-500 mt-1">アップロード中...</p>
+        <p className="text-xs text-ink-500 mt-1.5">アップロード中...</p>
       )}
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-coral-700 mt-1.5">{error}</p>}
     </div>
   );
 }

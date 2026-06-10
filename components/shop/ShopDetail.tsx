@@ -37,7 +37,6 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
 
-  // Browser back closes the modal
   useEffect(() => {
     if (!adding) return;
     window.history.pushState({ oshimiseAddShare: true }, '');
@@ -51,42 +50,60 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
   };
 
   return (
-    <main className="p-4 pb-24 max-w-2xl mx-auto space-y-4">
+    <main className="p-4 pb-24 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/" className="text-neutral-500 hover:underline">
+        <Link
+          href="/"
+          className="text-ink-500 hover:text-coral-600 transition-colors"
+        >
           ← ホーム
         </Link>
       </div>
 
       <PhotoGallery photos={photos} />
 
-      <header>
-        <h1 className="text-xl font-bold">{shop.name}</h1>
-        <div className="mt-1 text-sm text-neutral-700 flex gap-2 flex-wrap">
-          {shop.genre && <span>🍴 {shop.genre}</span>}
-          {priceText(shop.priceLevel) && <span>{priceText(shop.priceLevel)}</span>}
-          {(shop.area || shop.city || shop.pref) && (
-            <span>📍 {shop.area || shop.city || shop.pref}</span>
+      <div className="rounded-3xl bg-white shadow-card p-5 space-y-3">
+        <header>
+          <h1 className="text-2xl font-bold tracking-tight text-ink-900">
+            {shop.name}
+          </h1>
+          <div className="mt-2 flex gap-2 flex-wrap items-center">
+            {shop.genre && (
+              <span className="inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-coral-50 text-coral-700 font-medium">
+                🍴 {shop.genre}
+              </span>
+            )}
+            {priceText(shop.priceLevel) && (
+              <span className="text-sm text-ink-500 font-medium">
+                {priceText(shop.priceLevel)}
+              </span>
+            )}
+            {(shop.area || shop.city || shop.pref) && (
+              <span className="text-xs text-ink-500">
+                📍 {shop.area || shop.city || shop.pref}
+              </span>
+            )}
+          </div>
+          {shop.address && (
+            <p className="mt-2 text-xs text-ink-400">{shop.address}</p>
           )}
-        </div>
-        {shop.address && (
-          <p className="mt-1 text-xs text-neutral-600">{shop.address}</p>
-        )}
-        {shop.gmapUrl && (
-          <a
-            href={shop.gmapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm text-blue-700 underline"
-          >
-            Googleマップで開く →
-          </a>
-        )}
-      </header>
+          {shop.gmapUrl && (
+            <a
+              href={shop.gmapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-sm text-sea-600 hover:text-sea-700 font-medium"
+            >
+              Googleマップで開く →
+            </a>
+          )}
+        </header>
+      </div>
 
-      <section>
-        <h2 className="text-base font-medium mb-3">
-          みんなの共有 ({recommendations.length})
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold text-ink-900 px-1">
+          みんなの共有
+          <span className="ml-1.5 text-coral-600">{recommendations.length}</span>
         </h2>
         <ShareList items={recommendations} />
       </section>
@@ -94,7 +111,7 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
       <button
         type="button"
         onClick={() => setAdding(true)}
-        className="w-full rounded-lg bg-neutral-900 text-white py-3 font-medium"
+        className="w-full rounded-full bg-coral-500 hover:bg-coral-600 text-white py-3.5 font-semibold shadow-soft transition-colors"
       >
         ＋ 共有を追加
       </button>

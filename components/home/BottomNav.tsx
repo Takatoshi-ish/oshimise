@@ -14,7 +14,7 @@ const ITEMS: { id: HomeTab; icon: string; label: string }[] = [
 
 export function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-neutral-200 bg-white md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-cream-100 bg-white/95 backdrop-blur md:hidden">
       <ul className="flex">
         {ITEMS.map((it) => {
           const isActive = it.id === active;
@@ -23,17 +23,21 @@ export function BottomNav({ active, onChange }: Props) {
               <button
                 type="button"
                 onClick={() => onChange(it.id)}
-                className={`w-full py-2 text-xs flex flex-col items-center gap-0.5 ${
-                  isActive
-                    ? 'text-neutral-900 font-semibold'
-                    : 'text-neutral-500'
+                className={`relative w-full py-2.5 text-xs flex flex-col items-center gap-0.5 transition-colors ${
+                  isActive ? 'text-coral-600' : 'text-ink-400'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span className="text-lg" aria-hidden>
+                <span
+                  className={`text-xl transition-transform ${isActive ? 'scale-110' : ''}`}
+                  aria-hidden
+                >
                   {it.icon}
                 </span>
-                {it.label}
+                <span className={isActive ? 'font-semibold' : ''}>{it.label}</span>
+                {isActive && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-coral-500" />
+                )}
               </button>
             </li>
           );

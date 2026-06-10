@@ -11,7 +11,7 @@ export type Recommendation = {
 export function ShareList({ items }: { items: Recommendation[] }) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-neutral-500">まだ共有がありません</p>
+      <p className="text-sm text-ink-400">まだ共有がありません</p>
     );
   }
   return (
@@ -19,12 +19,17 @@ export function ShareList({ items }: { items: Recommendation[] }) {
       {items.map((r) => (
         <li
           key={r.id}
-          className="border border-neutral-200 rounded p-3 bg-white"
+          className="rounded-2xl bg-white shadow-card border border-cream-100 p-4"
         >
-          <div className="text-xs text-neutral-500">
-            👤 {r.memberName} ・ {timeAgo(r.createdAt)}
+          <div className="flex items-center gap-2 text-xs text-ink-400">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-coral-100 text-coral-700 font-semibold text-xs">
+              {r.memberName.slice(0, 1)}
+            </span>
+            <span className="font-medium text-ink-600">{r.memberName}</span>
+            <span>・</span>
+            <span>{timeAgo(r.createdAt)}</span>
           </div>
-          <p className="mt-1 text-sm whitespace-pre-wrap">{r.comment}</p>
+          <p className="mt-2 text-sm whitespace-pre-wrap text-ink-900">{r.comment}</p>
         </li>
       ))}
     </ul>

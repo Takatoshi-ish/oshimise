@@ -240,26 +240,26 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center">
-      <div className="bg-white w-full md:max-w-xl md:rounded-lg max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-neutral-200 px-4 py-3 flex justify-between items-center">
-          <h2 className="font-bold">お店を投稿</h2>
+    <div className="fixed inset-0 z-50 bg-ink/40 flex items-end md:items-center justify-center backdrop-blur-sm">
+      <div className="bg-cream-50 w-full md:max-w-xl md:rounded-3xl rounded-t-3xl max-h-[92vh] overflow-y-auto shadow-cardHover">
+        <div className="sticky top-0 bg-cream-50/95 backdrop-blur border-b border-cream-100 px-5 py-3.5 flex justify-between items-center">
+          <h2 className="font-bold text-ink-900">お店を投稿</h2>
           <button
             onClick={onClose}
             aria-label="閉じる"
-            className="text-2xl leading-none px-2"
+            className="text-2xl leading-none px-2 text-ink-400 hover:text-ink-600"
           >
             ×
           </button>
         </div>
-        <div className="px-4 py-4 space-y-4">
+        <div className="px-5 py-5 space-y-4">
           {restored && (
-            <div className="rounded bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-900 flex items-center justify-between gap-2">
+            <div className="rounded-2xl bg-sea-50 border border-sea-100 px-3.5 py-2.5 text-xs text-sea-700 flex items-center justify-between gap-2">
               <span>前回の入力を復元しました</span>
               <button
                 type="button"
                 onClick={handleResetDraft}
-                className="underline whitespace-nowrap"
+                className="underline whitespace-nowrap font-medium"
               >
                 最初からやり直す
               </button>
@@ -271,31 +271,33 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
             onSelect={handleSelectPlace}
           />
           {loadingDetails && (
-            <div className="text-sm text-neutral-500 flex items-center gap-2">
+            <div className="text-sm text-ink-500 flex items-center gap-2">
               <Spinner /> 詳細を取得中...
             </div>
           )}
 
           {place && pinLat !== null && pinLng !== null && (
             <>
-              <div className="rounded border border-neutral-200 px-3 py-2 text-sm bg-neutral-50">
-                <div className="font-medium">{place.name}</div>
+              <div className="rounded-2xl bg-white shadow-soft border border-cream-100 px-4 py-3 text-sm">
+                <div className="font-semibold text-ink-900">{place.name}</div>
                 {place.address && (
-                  <div className="text-xs text-neutral-600 mt-0.5">
+                  <div className="text-xs text-ink-500 mt-0.5">
                     {place.address}
                   </div>
                 )}
-                {place.pref && (
-                  <div className="text-xs text-neutral-600 mt-0.5">
-                    📍 {place.pref}
-                    {place.city ? ` / ${place.city}` : ''}
-                  </div>
-                )}
-                {place.genreSuggestion && (
-                  <div className="text-xs text-neutral-600 mt-0.5">
-                    🍴 {place.genreSuggestion} (自動)
-                  </div>
-                )}
+                <div className="flex gap-2 flex-wrap mt-1.5 text-xs">
+                  {place.pref && (
+                    <span className="text-ink-500">
+                      📍 {place.pref}
+                      {place.city ? ` / ${place.city}` : ''}
+                    </span>
+                  )}
+                  {place.genreSuggestion && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-coral-50 text-coral-700 font-medium">
+                      🍴 {place.genreSuggestion}
+                    </span>
+                  )}
+                </div>
               </div>
               <MapPreview
                 lat={pinLat}
@@ -306,25 +308,25 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
                 }}
               />
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-semibold text-ink-900 mb-1.5">
                   ジャンル
                 </label>
                 <input
                   type="text"
                   value={genre}
                   onChange={(e) => setGenre(e.target.value)}
-                  className="w-full rounded border border-neutral-300 px-3 py-2 text-base"
+                  className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-semibold text-ink-900 mb-1.5">
                   エリア/沿線
                 </label>
                 <input
                   type="text"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
-                  className="w-full rounded border border-neutral-300 px-3 py-2 text-base"
+                  className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
                 />
               </div>
               <PriceSelector value={priceLevel} onChange={setPriceLevel} />
@@ -338,7 +340,7 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
             </>
           )}
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-coral-700">{error}</p>}
 
           <button
             type="button"
@@ -346,7 +348,7 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
             disabled={
               submitting || !place || !memberId || !comment.trim()
             }
-            className="w-full rounded-lg bg-neutral-900 text-white py-3 font-medium disabled:opacity-40 flex items-center justify-center gap-2"
+            className="w-full rounded-full bg-coral-500 hover:bg-coral-600 text-white py-3.5 font-semibold disabled:opacity-40 disabled:hover:bg-coral-500 flex items-center justify-center gap-2 shadow-soft transition-colors"
           >
             {submitting && <Spinner />}
             投稿する

@@ -13,7 +13,6 @@ type Props = {
   onChange: (next: Filters) => void;
 };
 
-// 47都道府県の代表的なものをdatalist候補に。自由入力可。
 const PREF_SUGGESTIONS = [
   '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
   '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
@@ -25,16 +24,24 @@ const PREF_SUGGESTIONS = [
   '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
 
+const inputClass =
+  'rounded-full border border-cream-200 bg-white px-4 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors';
+
 export function FilterBar({ filters, onChange }: Props) {
+  const hasAnyFilter =
+    filters.pref || filters.genre || filters.q;
+
   return (
-    <div className="space-y-2">
-      <div className="text-xs text-neutral-500 font-medium">🔍 絞り込み</div>
+    <div className="space-y-3">
+      <div className="text-xs text-ink-400 font-semibold tracking-wide uppercase">
+        🔍 絞り込み
+      </div>
       <input
         type="search"
         value={filters.q}
         onChange={(e) => onChange({ ...filters, q: e.target.value })}
         placeholder="店名・料理・食材で検索"
-        className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+        className={`${inputClass} w-full`}
       />
       <div className="flex gap-2 flex-wrap items-center">
         <input
@@ -43,7 +50,7 @@ export function FilterBar({ filters, onChange }: Props) {
           onChange={(e) => onChange({ ...filters, pref: e.target.value })}
           placeholder="都道府県"
           list="pref-suggestions"
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm w-32"
+          className={`${inputClass} w-32`}
         />
         <datalist id="pref-suggestions">
           {PREF_SUGGESTIONS.map((p) => (
@@ -56,7 +63,7 @@ export function FilterBar({ filters, onChange }: Props) {
           onChange={(e) => onChange({ ...filters, genre: e.target.value })}
           placeholder="ジャンル"
           list="genre-suggestions"
-          className="rounded border border-neutral-300 px-3 py-1.5 text-sm w-32"
+          className={`${inputClass} w-32`}
         />
         <datalist id="genre-suggestions">
           {GENRE_SUGGESTIONS.map((g) => (
@@ -71,20 +78,20 @@ export function FilterBar({ filters, onChange }: Props) {
               sort: e.target.value as Filters['sort'],
             })
           }
-          className="rounded border border-neutral-300 px-2 py-1.5 text-sm bg-white"
+          className={`${inputClass} pr-3 cursor-pointer`}
           aria-label="並び替え"
         >
           <option value="new">店の新着順</option>
           <option value="recent_share">最近共有された順</option>
           <option value="count">共有件数の多い順</option>
         </select>
-        {(filters.pref || filters.genre || filters.q) && (
+        {hasAnyFilter && (
           <button
             type="button"
             onClick={() =>
               onChange({ pref: '', genre: '', q: '', sort: filters.sort })
             }
-            className="text-xs text-neutral-500 underline"
+            className="text-xs text-coral-600 hover:text-coral-700 underline"
           >
             クリア
           </button>
