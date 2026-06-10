@@ -5,29 +5,28 @@ type Props = {
   onChange: (v: number | null) => void;
 };
 
-const PRICES: { value: number; mark: string; range: string }[] = [
-  { value: 1, mark: '¥', range: '〜1,000円' },
-  { value: 2, mark: '¥¥', range: '1,000〜3,000円' },
-  { value: 3, mark: '¥¥¥', range: '3,000〜10,000円' },
-  { value: 4, mark: '¥¥¥¥', range: '10,000円〜' },
+const PRICES: { value: number; label: string }[] = [
+  { value: 1, label: '〜1,000円' },
+  { value: 2, label: '1,000〜3,000円' },
+  { value: 3, label: '3,000〜10,000円' },
+  { value: 4, label: '10,000円〜' },
 ];
 
 export function PriceSelector({ value, onChange }: Props) {
   return (
     <div>
       <label className="block text-sm font-medium mb-1">価格帯（任意）</label>
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         <button
           type="button"
           onClick={() => onChange(null)}
-          className={`px-2 py-2 rounded border text-xs flex flex-col items-center justify-center ${
+          className={`px-3 py-1.5 rounded border text-sm ${
             value === null
               ? 'bg-neutral-900 text-white border-neutral-900'
               : 'border-neutral-300'
           }`}
         >
-          <span className="font-medium">不明</span>
-          <span className="text-[10px] opacity-70 mt-0.5">設定しない</span>
+          不明
         </button>
         {PRICES.map((p) => {
           const selected = value === p.value;
@@ -36,14 +35,13 @@ export function PriceSelector({ value, onChange }: Props) {
               key={p.value}
               type="button"
               onClick={() => onChange(p.value)}
-              className={`px-2 py-2 rounded border text-xs flex flex-col items-center justify-center ${
+              className={`px-3 py-1.5 rounded border text-sm ${
                 selected
                   ? 'bg-neutral-900 text-white border-neutral-900'
                   : 'border-neutral-300'
               }`}
             >
-              <span className="font-medium">{p.mark}</span>
-              <span className="text-[10px] opacity-70 mt-0.5">{p.range}</span>
+              {p.label}
             </button>
           );
         })}
