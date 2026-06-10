@@ -28,6 +28,7 @@ const PREF_SUGGESTIONS = [
 export function FilterBar({ filters, onChange }: Props) {
   return (
     <div className="space-y-2">
+      <div className="text-xs text-neutral-500 font-medium">🔍 絞り込み</div>
       <input
         type="search"
         value={filters.q}

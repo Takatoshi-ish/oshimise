@@ -72,12 +72,12 @@ export default function HomePage() {
       <section
         className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-neutral-200 md:overflow-y-auto`}
       >
-        {/* PC-only top strip: just the post button (no sub-tabs needed since Feed is gone) */}
-        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2 justify-end items-center">
+        {/* PC-only top strip: bigger primary action */}
+        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2.5 justify-end items-center">
           <button
             type="button"
             onClick={openCompose}
-            className="rounded-full bg-neutral-900 text-white px-4 py-1.5 text-sm font-medium"
+            className="rounded-lg bg-neutral-900 text-white px-5 py-2.5 text-base font-medium shadow-sm hover:bg-neutral-800"
           >
             ＋ お店を投稿
           </button>

@@ -123,13 +123,22 @@ export function MapView({ shops, onSelect, onPostClick }: Props) {
                   <span>📍 {selected.area || selected.city}</span>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => onSelect?.(selected.id)}
-                className="mt-2 text-blue-700 underline text-xs"
-              >
-                詳細を見る →
-              </button>
+              <div className="mt-2 flex gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => onSelect?.(selected.id)}
+                  className="text-blue-700 underline"
+                >
+                  詳細を見る →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelect?.(selected.id)}
+                  className="text-blue-700 underline"
+                >
+                  ＋ 共有を追加
+                </button>
+              </div>
             </div>
           </InfoWindow>
         )}

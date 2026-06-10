@@ -49,8 +49,10 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
     );
   }
   return (
-    <ul className="space-y-3">
-      {shops.map((s) => (
+    <div className="space-y-2">
+      <div className="text-xs text-neutral-500">全 {shops.length} 件</div>
+      <ul className="space-y-3">
+        {shops.map((s) => (
         <li
           key={s.id}
           className="border border-neutral-200 rounded-lg p-3 flex gap-3 bg-white"
@@ -86,7 +88,8 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
             </div>
           </div>
         </li>
-      ))}
-    </ul>
+        ))}
+      </ul>
+    </div>
   );
 }

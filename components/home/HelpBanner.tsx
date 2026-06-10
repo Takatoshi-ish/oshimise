@@ -20,7 +20,6 @@ export function HelpBanner() {
 
   const expand = () => setOpen(true);
 
-  // SSR: render closed shell to avoid hydration mismatch
   if (!hydrated || !open) {
     return (
       <div className="text-xs">
@@ -29,16 +28,16 @@ export function HelpBanner() {
           onClick={expand}
           className="text-neutral-500 underline"
         >
-          ℹ️ 使い方
+          ℹ️ 使い方を見る
         </button>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm space-y-2">
+    <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm space-y-2">
       <div className="flex justify-between items-start gap-2">
-        <p className="font-medium">オシミセ の使い方</p>
+        <p className="font-medium text-sky-900">オシミセ の使い方</p>
         <button
           type="button"
           onClick={dismiss}
@@ -48,21 +47,34 @@ export function HelpBanner() {
           ×
         </button>
       </div>
-      <ol className="list-decimal pl-5 space-y-1 text-neutral-800">
-        <li>
-          <strong>＋投稿</strong> ボタンから、メンバーが見つけたオススメ店を登録
-          (店名を選ぶだけ、なぜ良いかコメントを添える)
+      <ul className="space-y-1.5 text-neutral-800">
+        <li className="flex gap-2">
+          <span aria-hidden>➕</span>
+          <span>
+            <strong>お店を投稿</strong>:
+            右下(モバイル)or 右上(PC)のボタンから、店名を選んで「なぜ良いか」を一言
+          </span>
         </li>
-        <li>
-          <strong>探す</strong>: 都道府県・ジャンル・キーワードで絞り込み、並び替えも可
+        <li className="flex gap-2">
+          <span aria-hidden>🔍</span>
+          <span>
+            <strong>探す</strong>: 都道府県・ジャンル・キーワードで絞り込み。並び替えも可能
+          </span>
         </li>
-        <li>
-          <strong>店をタップ</strong>すると詳細・みんなの共有が見えます
+        <li className="flex gap-2">
+          <span aria-hidden>📍</span>
+          <span>
+            <strong>店をタップ</strong>すると詳細&みんなの共有が見えます
+          </span>
         </li>
-        <li>
-          同じ店をもう一度投稿すると、自分の共有が積み増しされます (重複は自動でまとめます)
+        <li className="flex gap-2">
+          <span aria-hidden>💬</span>
+          <span>
+            同じ店をもう一度投稿すると、あなたの共有が積み上がります
+            (同じ店なら自動でまとめます)
+          </span>
         </li>
-      </ol>
+      </ul>
     </div>
   );
 }
