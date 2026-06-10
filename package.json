@@ -1,0 +1,34 @@
+{
+  "name": "oshimise",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit",
+    "db:schema": "psql \"$DATABASE_URL\" -f db/schema.sql",
+    "db:seed": "psql \"$DATABASE_URL\" -f db/seed.sql"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "pg": "^8.11.0",
+    "zod": "^3.23.0",
+    "sharp": "^0.33.0",
+    "googleapis": "^144.0.0",
+    "@vis.gl/react-google-maps": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/pg": "^8.11.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "typescript": "^5.3.0"
+  }
+}
