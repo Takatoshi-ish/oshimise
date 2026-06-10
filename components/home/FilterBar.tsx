@@ -24,25 +24,32 @@ const PREF_SUGGESTIONS = [
   '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
 
-const inputClass =
-  'rounded-full border border-cream-200 bg-white px-4 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors';
+const chipInput =
+  'rounded-full border border-cream-200 bg-cream-50 px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors';
 
 export function FilterBar({ filters, onChange }: Props) {
-  const hasAnyFilter =
-    filters.pref || filters.genre || filters.q;
+  const hasAnyFilter = filters.pref || filters.genre || filters.q;
 
   return (
     <div className="space-y-3">
-      <div className="text-xs text-ink-400 font-semibold tracking-wide uppercase">
-        🔍 絞り込み
+      {/* Search input with icon */}
+      <div className="relative">
+        <span
+          aria-hidden
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-base pointer-events-none"
+        >
+          🔍
+        </span>
+        <input
+          type="search"
+          value={filters.q}
+          onChange={(e) => onChange({ ...filters, q: e.target.value })}
+          placeholder="店名・料理・食材で検索"
+          className="w-full rounded-full border border-cream-200 bg-white pl-11 pr-4 py-3 text-sm shadow-soft focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
+        />
       </div>
-      <input
-        type="search"
-        value={filters.q}
-        onChange={(e) => onChange({ ...filters, q: e.target.value })}
-        placeholder="店名・料理・食材で検索"
-        className={`${inputClass} w-full`}
-      />
+
+      {/* Filter chips row */}
       <div className="flex gap-2 flex-wrap items-center">
         <input
           type="text"
@@ -50,7 +57,7 @@ export function FilterBar({ filters, onChange }: Props) {
           onChange={(e) => onChange({ ...filters, pref: e.target.value })}
           placeholder="都道府県"
           list="pref-suggestions"
-          className={`${inputClass} w-32`}
+          className={`${chipInput} w-28`}
         />
         <datalist id="pref-suggestions">
           {PREF_SUGGESTIONS.map((p) => (
@@ -63,7 +70,7 @@ export function FilterBar({ filters, onChange }: Props) {
           onChange={(e) => onChange({ ...filters, genre: e.target.value })}
           placeholder="ジャンル"
           list="genre-suggestions"
-          className={`${inputClass} w-32`}
+          className={`${chipInput} w-28`}
         />
         <datalist id="genre-suggestions">
           {GENRE_SUGGESTIONS.map((g) => (
@@ -73,12 +80,9 @@ export function FilterBar({ filters, onChange }: Props) {
         <select
           value={filters.sort}
           onChange={(e) =>
-            onChange({
-              ...filters,
-              sort: e.target.value as Filters['sort'],
-            })
+            onChange({ ...filters, sort: e.target.value as Filters['sort'] })
           }
-          className={`${inputClass} pr-3 cursor-pointer`}
+          className={`${chipInput} pr-3 cursor-pointer`}
           aria-label="並び替え"
         >
           <option value="new">店の新着順</option>
@@ -91,7 +95,7 @@ export function FilterBar({ filters, onChange }: Props) {
             onClick={() =>
               onChange({ pref: '', genre: '', q: '', sort: filters.sort })
             }
-            className="text-xs text-coral-600 hover:text-coral-700 underline"
+            className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
           >
             クリア
           </button>

@@ -65,26 +65,29 @@ export default function HomePage() {
   };
 
   return (
-    <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-57px)] pb-16 md:pb-0">
+    <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-60px)] pb-16 md:pb-0">
       {/* Left pane */}
       <section
         className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-cream-100 md:overflow-y-auto`}
       >
-        {/* PC-only top bar: post CTA */}
-        <div className="hidden md:flex sticky top-0 z-10 bg-cream-50/90 backdrop-blur border-b border-cream-100 px-5 py-3 justify-between items-center">
-          <p className="text-xs text-ink-400 font-semibold tracking-wide uppercase">
-            探す & 集める
-          </p>
+        {/* PC top bar: encouraging text + post CTA */}
+        <div className="hidden md:flex sticky top-0 z-10 bg-cream-50/85 backdrop-blur-md border-b border-cream-100 px-6 py-3.5 justify-between items-center">
+          <div className="flex flex-col leading-tight">
+            <p className="text-base font-bold text-ink-900">今日も推し店を探そう</p>
+            <p className="text-xs text-ink-400 font-medium">
+              みんなのオススメから、次に行きたいお店を見つけて
+            </p>
+          </div>
           <button
             type="button"
             onClick={openCompose}
-            className="rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-2.5 text-sm font-semibold shadow-soft transition-colors"
+            className="rounded-full bg-gradient-to-br from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-5 py-2.5 text-sm font-semibold shadow-soft hover:shadow-cardHover transition-all"
           >
             ＋ お店を投稿
           </button>
         </div>
 
-        <div className="p-4 md:p-5 space-y-5">
+        <div className="p-4 md:p-6 space-y-5">
           <HelpBanner />
           <FilterBar filters={filters} onChange={setFilters} />
           <ShopList
@@ -97,7 +100,7 @@ export default function HomePage() {
 
       {/* Right pane: map */}
       <section
-        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:w-2/5 h-[calc(100vh-57px-64px)] md:h-auto`}
+        className={`${tab === 'map' ? 'block' : 'hidden'} md:block md:w-2/5 h-[calc(100vh-60px-56px)] md:h-auto`}
       >
         <MapView
           shops={shops}
@@ -106,11 +109,11 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Mobile FAB */}
+      {/* Mobile FAB — coral gradient pill */}
       <button
         type="button"
         onClick={openCompose}
-        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-coral-500 hover:bg-coral-600 text-white px-5 py-3.5 shadow-cardHover font-semibold text-base transition-colors"
+        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-gradient-to-br from-coral-500 to-coral-600 hover:from-coral-600 hover:to-coral-700 text-white px-5 py-3.5 shadow-cardHover font-semibold text-base transition-all"
         aria-label="お店を投稿"
       >
         ＋ 投稿
