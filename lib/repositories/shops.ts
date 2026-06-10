@@ -160,12 +160,14 @@ type CardRow = {
 
 export async function listShopCards(
   filters: ShopListFilters,
-  sort: 'new' | 'count',
+  sort: 'new' | 'count' | 'recent_share',
 ): Promise<ShopCard[]> {
   const orderBy =
     sort === 'count'
       ? 'share_count DESC, s.created_at DESC'
-      : 's.created_at DESC';
+      : sort === 'recent_share'
+        ? '(SELECT MAX(created_at) FROM recommendations WHERE shop_id = s.id) DESC NULLS LAST, s.created_at DESC'
+        : 's.created_at DESC';
   const r = await query<CardRow>(
     `SELECT
        s.id, s.name, s.genre, s.pref, s.city, s.area,

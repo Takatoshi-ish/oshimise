@@ -1,6 +1,6 @@
 'use client';
 
-export type HomeTab = 'map' | 'list' | 'feed';
+export type HomeTab = 'map' | 'list';
 
 type Props = {
   active: HomeTab;
@@ -8,9 +8,8 @@ type Props = {
 };
 
 const ITEMS: { id: HomeTab; icon: string; label: string }[] = [
+  { id: 'list', icon: '📋', label: '一覧' },
   { id: 'map', icon: '🗺️', label: '地図' },
-  { id: 'list', icon: '📋', label: 'さがす' },
-  { id: 'feed', icon: '🆕', label: '共有' },
 ];
 
 export function BottomNav({ active, onChange }: Props) {
@@ -31,7 +30,9 @@ export function BottomNav({ active, onChange }: Props) {
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span className="text-lg" aria-hidden>{it.icon}</span>
+                <span className="text-lg" aria-hidden>
+                  {it.icon}
+                </span>
                 {it.label}
               </button>
             </li>

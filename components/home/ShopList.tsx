@@ -18,6 +18,7 @@ export type ShopCard = {
 type Props = {
   shops: ShopCard[];
   loading?: boolean;
+  onPostClick?: () => void;
 };
 
 function priceText(level: number | null): string {
@@ -26,15 +27,24 @@ function priceText(level: number | null): string {
   return '¥'.repeat(Math.min(level, 4));
 }
 
-export function ShopList({ shops, loading }: Props) {
+export function ShopList({ shops, loading, onPostClick }: Props) {
   if (loading) {
     return <p className="text-sm text-neutral-500">読み込み中...</p>;
   }
   if (shops.length === 0) {
     return (
-      <div className="text-center py-10 text-sm text-neutral-500">
-        <p className="mb-2">まだお店がありません。</p>
-        <p>右下の「＋投稿」から最初のお店を投稿しよう。</p>
+      <div className="text-center py-10 text-sm text-neutral-600">
+        <p className="text-base mb-1">まだお店がありません</p>
+        <p className="mb-4">最初の1店を投稿しましょう!</p>
+        {onPostClick && (
+          <button
+            type="button"
+            onClick={onPostClick}
+            className="rounded-lg bg-neutral-900 text-white px-5 py-3 font-medium"
+          >
+            ＋ お店を投稿する
+          </button>
+        )}
       </div>
     );
   }

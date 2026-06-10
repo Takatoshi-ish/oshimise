@@ -5,7 +5,7 @@ export type Filters = {
   pref: string;
   genre: string;
   q: string;
-  sort: 'new' | 'count';
+  sort: 'new' | 'count' | 'recent_share';
 };
 
 type Props = {
@@ -65,13 +65,17 @@ export function FilterBar({ filters, onChange }: Props) {
         <select
           value={filters.sort}
           onChange={(e) =>
-            onChange({ ...filters, sort: e.target.value as 'new' | 'count' })
+            onChange({
+              ...filters,
+              sort: e.target.value as Filters['sort'],
+            })
           }
           className="rounded border border-neutral-300 px-2 py-1.5 text-sm bg-white"
           aria-label="並び替え"
         >
-          <option value="new">新着順</option>
-          <option value="count">共有件数順</option>
+          <option value="new">店の新着順</option>
+          <option value="recent_share">最近共有された順</option>
+          <option value="count">共有件数の多い順</option>
         </select>
         {(filters.pref || filters.genre || filters.q) && (
           <button

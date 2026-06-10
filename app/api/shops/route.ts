@@ -25,7 +25,7 @@ const ListQuerySchema = z.object({
   area: z.string().trim().min(1).max(30).optional().nullable(),
   genre: z.string().trim().min(1).max(30).optional().nullable(),
   q: z.string().trim().min(1).max(100).optional().nullable(),
-  sort: z.enum(['new', 'count']).default('new'),
+  sort: z.enum(['new', 'count', 'recent_share']).default('new'),
 });
 
 export async function GET(req: NextRequest) {

@@ -4,14 +4,14 @@ import { ComposeModal } from '@/components/compose/ComposeModal';
 import { FilterBar, type Filters } from '@/components/home/FilterBar';
 import { ShopList, type ShopCard } from '@/components/home/ShopList';
 import { MapView } from '@/components/home/MapView';
-import { Feed, type FeedItem } from '@/components/home/Feed';
 import { BottomNav, type HomeTab } from '@/components/home/BottomNav';
+import { HelpBanner } from '@/components/home/HelpBanner';
 
 const INITIAL_FILTERS: Filters = {
   pref: '',
   genre: '',
   q: '',
-  sort: 'new',
+  sort: 'recent_share',
 };
 
 function buildShopsQS(f: Filters): string {
@@ -23,20 +23,11 @@ function buildShopsQS(f: Filters): string {
   return p.toString();
 }
 
-function buildFeedQS(f: Filters): string {
-  const p = new URLSearchParams();
-  if (f.pref) p.set('pref', f.pref);
-  if (f.genre) p.set('genre', f.genre);
-  return p.toString();
-}
-
 export default function HomePage() {
   const [tab, setTab] = useState<HomeTab>('list');
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [shops, setShops] = useState<ShopCard[]>([]);
-  const [feed, setFeed] = useState<FeedItem[]>([]);
   const [shopsLoading, setShopsLoading] = useState(false);
-  const [feedLoading, setFeedLoading] = useState(false);
   const [composing, setComposing] = useState(false);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,14 +48,6 @@ export default function HomePage() {
     };
   }, [filters]);
 
-  useEffect(() => {
-    setFeedLoading(true);
-    fetch(`/api/feed?${buildFeedQS(filters)}`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setFeed)
-      .finally(() => setFeedLoading(false));
-  }, [filters.pref, filters.genre]);
-
   // Browser back closes the compose modal
   useEffect(() => {
     if (!composing) return;
@@ -78,59 +61,36 @@ export default function HomePage() {
     if (composing) window.history.back();
   };
 
-  // PC sub-tab highlight: 'map' state has no meaning on PC (map is always shown);
-  // treat it as "list" for the tab strip.
-  const pcActive: 'list' | 'feed' = tab === 'feed' ? 'feed' : 'list';
+  const openCompose = () => setComposing(true);
+  const goShop = (id: string) => {
+    window.location.href = `/shops/${id}`;
+  };
 
   return (
     <main className="md:flex md:gap-0 md:max-w-7xl md:mx-auto md:h-[calc(100vh-49px)] pb-16 md:pb-0">
-      {/* Left pane: filter + (shop list | feed) */}
+      {/* Left pane: help + filter + shop list */}
       <section
-        className={`${tab === 'list' || tab === 'feed' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-neutral-200 md:overflow-y-auto`}
+        className={`${tab === 'list' ? 'block' : 'hidden'} md:block md:w-3/5 md:border-r md:border-neutral-200 md:overflow-y-auto`}
       >
-        {/* PC-only top strip: sub-tabs + post button */}
-        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2 justify-between items-center">
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => setTab('list')}
-              className={`px-3 py-1.5 text-sm rounded ${
-                pcActive === 'list'
-                  ? 'bg-neutral-900 text-white font-medium'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              📋 さがす
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab('feed')}
-              className={`px-3 py-1.5 text-sm rounded ${
-                pcActive === 'feed'
-                  ? 'bg-neutral-900 text-white font-medium'
-                  : 'text-neutral-600 hover:bg-neutral-100'
-              }`}
-            >
-              🆕 みんなの共有
-            </button>
-          </div>
+        {/* PC-only top strip: just the post button (no sub-tabs needed since Feed is gone) */}
+        <div className="hidden md:flex sticky top-0 z-10 bg-white border-b border-neutral-200 px-4 py-2 justify-end items-center">
           <button
             type="button"
-            onClick={() => setComposing(true)}
+            onClick={openCompose}
             className="rounded-full bg-neutral-900 text-white px-4 py-1.5 text-sm font-medium"
           >
-            ＋ 投稿
+            ＋ お店を投稿
           </button>
         </div>
 
         <div className="p-4 space-y-4">
+          <HelpBanner />
           <FilterBar filters={filters} onChange={setFilters} />
-          <div className={pcActive === 'feed' ? 'hidden' : 'block'}>
-            <ShopList shops={shops} loading={shopsLoading} />
-          </div>
-          <div className={pcActive === 'feed' ? 'block' : 'hidden'}>
-            <Feed items={feed} loading={feedLoading} />
-          </div>
+          <ShopList
+            shops={shops}
+            loading={shopsLoading}
+            onPostClick={openCompose}
+          />
         </div>
       </section>
 
@@ -140,16 +100,17 @@ export default function HomePage() {
       >
         <MapView
           shops={shops}
-          onSelect={(id) => (window.location.href = `/shops/${id}`)}
+          onSelect={goShop}
+          onPostClick={openCompose}
         />
       </section>
 
-      {/* Mobile FAB */}
+      {/* Mobile FAB with label so it's clearly the primary action */}
       <button
         type="button"
-        onClick={() => setComposing(true)}
-        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-neutral-900 text-white px-5 py-4 shadow-lg font-medium"
-        aria-label="投稿"
+        onClick={openCompose}
+        className="md:hidden fixed bottom-20 right-4 z-20 rounded-full bg-neutral-900 text-white px-5 py-4 shadow-lg font-medium text-base"
+        aria-label="お店を投稿"
       >
         ＋ 投稿
       </button>
