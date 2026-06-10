@@ -52,7 +52,9 @@ export function HelpBanner() {
           <span aria-hidden>➕</span>
           <span>
             <strong>お店を投稿</strong>:
-            右下(モバイル)or 右上(PC)のボタンから、店名を選んで「なぜ良いか」を一言
+            <span className="md:hidden"> 右下の「＋投稿」ボタン</span>
+            <span className="hidden md:inline"> 右上の「＋お店を投稿」ボタン</span>
+            から、店名を選んで「なぜ良いか」を一言
           </span>
         </li>
         <li className="flex gap-2">
