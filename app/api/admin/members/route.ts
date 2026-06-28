@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { isAdmin } from '@/lib/admin-auth';
 import { listAllMembers, insertMember } from '@/lib/repositories/members';
+import { findTeamById } from '@/lib/repositories/teams';
 import { appendMember, fireAndForget } from '@/lib/sheets';
 
 export const runtime = 'nodejs';
@@ -47,11 +48,13 @@ export async function POST(req: NextRequest) {
     );
   }
   const member = await insertMember(parsed.data.name, parsed.data.teamId ?? null);
+  const team = member.teamId ? await findTeamById(member.teamId) : null;
   fireAndForget(
     'admin member POST',
     appendMember({
       name: member.name,
       active: member.active,
+      teamName: team?.name ?? null,
       createdAt: member.createdAt,
     }),
   );

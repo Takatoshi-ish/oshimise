@@ -42,9 +42,21 @@ export async function insertRecommendation(
   shopId: string,
   memberId: string,
   comment: string,
-): Promise<{ id: string; createdAt: string; memberName: string }> {
-  const m = await client.query<{ active: boolean; name: string }>(
-    'SELECT active, name FROM members WHERE id = $1',
+): Promise<{
+  id: string;
+  createdAt: string;
+  memberName: string;
+  teamName: string | null;
+}> {
+  const m = await client.query<{
+    active: boolean;
+    name: string;
+    team_name: string | null;
+  }>(
+    `SELECT m.active, m.name, t.name AS team_name
+     FROM members m
+     LEFT JOIN teams t ON t.id = m.team_id
+     WHERE m.id = $1`,
     [memberId],
   );
   if (m.rows.length === 0 || !m.rows[0].active) {
@@ -58,6 +70,7 @@ export async function insertRecommendation(
     id: r.rows[0].id,
     createdAt: r.rows[0].created_at,
     memberName: m.rows[0].name,
+    teamName: m.rows[0].team_name,
   };
 }
 

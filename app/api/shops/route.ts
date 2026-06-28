@@ -172,6 +172,7 @@ export async function POST(req: NextRequest) {
           shopId: result.shop.id,
           shopName: result.shop.name,
           memberName: result.rec.memberName,
+          teamName: result.rec.teamName,
           comment: comment,
           createdAt: result.rec.createdAt,
         });

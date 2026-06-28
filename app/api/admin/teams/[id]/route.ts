@@ -5,7 +5,10 @@ import {
   updateTeam,
   deleteTeamIfNoMembers,
   setTeamVisibility,
+  listVisibleTeamIds,
+  listAllTeams,
 } from '@/lib/repositories/teams';
+import { appendTeam, fireAndForget } from '@/lib/sheets';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -53,6 +56,25 @@ export async function PATCH(
   if (parsed.data.visibleTeamIds !== undefined) {
     await setTeamVisibility(id, parsed.data.visibleTeamIds);
   }
+  // Log every PATCH to the "チーム" tab so the spreadsheet keeps an event
+  // history (name change, active toggle, visibility update).
+  const [visibleIds, allTeams] = await Promise.all([
+    listVisibleTeamIds(id),
+    listAllTeams(),
+  ]);
+  const visibleNames = visibleIds
+    .filter((vid) => vid !== id)
+    .map((vid) => allTeams.find((t) => t.id === vid)?.name)
+    .filter((n): n is string => !!n);
+  fireAndForget(
+    'admin team PATCH',
+    appendTeam({
+      name: updated.name,
+      active: updated.active,
+      visibleTeamNames: visibleNames,
+      createdAt: new Date().toISOString(),
+    }),
+  );
   return NextResponse.json(updated);
 }
 

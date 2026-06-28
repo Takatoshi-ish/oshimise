@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
         shopId,
         shopName: result.shopName,
         memberName: result.rec.memberName,
+        teamName: result.rec.teamName,
         comment,
         createdAt: result.rec.createdAt,
       }),

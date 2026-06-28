@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     appendMember({
       name: member.name,
       active: member.active,
+      teamName: team.name,
       createdAt: member.createdAt,
     }),
   );

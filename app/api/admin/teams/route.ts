@@ -7,6 +7,7 @@ import {
   getTeamMemberCounts,
   getAllVisibility,
 } from '@/lib/repositories/teams';
+import { appendTeam, fireAndForget } from '@/lib/sheets';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -60,5 +61,14 @@ export async function POST(req: NextRequest) {
     );
   }
   const team = await insertTeam(parsed.data.name);
+  fireAndForget(
+    'admin team POST',
+    appendTeam({
+      name: team.name,
+      active: team.active,
+      visibleTeamNames: [],
+      createdAt: team.createdAt,
+    }),
+  );
   return NextResponse.json(team, { status: 201 });
 }

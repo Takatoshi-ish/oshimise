@@ -3,6 +3,8 @@ import { google, type sheets_v4 } from 'googleapis';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 let _client: sheets_v4.Sheets | null = null;
+// Per-tab cache for "is tab created and headers up to date" so we only hit
+// the metadata + values.update API once per server process per tab.
 const ensuredTabs = new Set<string>();
 
 function getSheetsId(): string {
@@ -28,6 +30,17 @@ function getClient(): sheets_v4.Sheets {
   return _client;
 }
 
+function colLetter(n: number): string {
+  let s = '';
+  let x = n;
+  while (x > 0) {
+    const r = (x - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    x = Math.floor((x - 1) / 26);
+  }
+  return s;
+}
+
 async function ensureTab(name: string, headers: string[]): Promise<void> {
   if (ensuredTabs.has(name)) return;
   const sheets = getClient();
@@ -46,13 +59,16 @@ async function ensureTab(name: string, headers: string[]): Promise<void> {
         requests: [{ addSheet: { properties: { title: name } } }],
       },
     });
-    await sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: `${name}!A1`,
-      valueInputOption: 'USER_ENTERED',
-      requestBody: { values: [headers] },
-    });
   }
+  // Always overwrite the header row so the live schema matches the data we
+  // append below — even if the tab pre-existed with an older header set.
+  const lastCol = colLetter(headers.length);
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${name}!A1:${lastCol}1`,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [headers] },
+  });
   ensuredTabs.add(name);
 }
 
@@ -72,6 +88,7 @@ async function appendRow(
 const SHOP_TAB = '店舗';
 const REC_TAB = 'みんなの共有';
 const MEMBER_TAB = 'メンバー';
+const TEAM_TAB = 'チーム';
 
 const SHOP_HEADERS = [
   '店舗ID',
@@ -91,10 +108,12 @@ const REC_HEADERS = [
   '店舗ID',
   '店名',
   '投稿者',
+  '投稿者チーム',
   '共有本文',
   '投稿日時',
 ];
-const MEMBER_HEADERS = ['メンバー名', '状態', '追加日時'];
+const MEMBER_HEADERS = ['メンバー名', 'チーム', '状態', '追加日時'];
+const TEAM_HEADERS = ['チーム名', '状態', '閲覧可能チーム', '追加日時'];
 
 export async function appendShop(shop: {
   id: string;
@@ -130,6 +149,8 @@ export async function appendRecommendation(rec: {
   shopId: string;
   shopName: string;
   memberName: string;
+  /** Team name at the moment of posting (may be empty for legacy unassigned members). */
+  teamName?: string | null;
   comment: string;
   createdAt: string;
 }): Promise<void> {
@@ -139,6 +160,7 @@ export async function appendRecommendation(rec: {
     rec.shopId,
     rec.shopName,
     rec.memberName,
+    rec.teamName ?? '',
     rec.comment,
     rec.createdAt,
   ]);
@@ -147,13 +169,32 @@ export async function appendRecommendation(rec: {
 export async function appendMember(m: {
   name: string;
   active: boolean;
+  /** Team name at the moment of this event. */
+  teamName?: string | null;
   createdAt: string;
 }): Promise<void> {
   await ensureTab(MEMBER_TAB, MEMBER_HEADERS);
   await appendRow(MEMBER_TAB, [
     m.name,
+    m.teamName ?? '',
     m.active ? '有効' : '無効',
     m.createdAt,
+  ]);
+}
+
+export async function appendTeam(t: {
+  name: string;
+  active: boolean;
+  /** Names of teams this team can view (excluding self). */
+  visibleTeamNames: string[];
+  createdAt: string;
+}): Promise<void> {
+  await ensureTab(TEAM_TAB, TEAM_HEADERS);
+  await appendRow(TEAM_TAB, [
+    t.name,
+    t.active ? '有効' : '無効',
+    t.visibleTeamNames.length > 0 ? t.visibleTeamNames.join(', ') : '(自チームのみ)',
+    t.createdAt,
   ]);
 }
 

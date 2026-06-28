@@ -5,6 +5,7 @@ import {
   updateMember,
   deleteMemberIfNoRecommendations,
 } from '@/lib/repositories/members';
+import { findTeamById } from '@/lib/repositories/teams';
 import { appendMember, fireAndForget } from '@/lib/sheets';
 
 export const runtime = 'nodejs';
@@ -52,11 +53,13 @@ export async function PATCH(
   }
   // Spec: append to "メンバー" tab on status change
   if (typeof parsed.data.active === 'boolean') {
+    const team = updated.teamId ? await findTeamById(updated.teamId) : null;
     fireAndForget(
       'admin member PATCH',
       appendMember({
         name: updated.name,
         active: updated.active,
+        teamName: team?.name ?? null,
         createdAt: new Date().toISOString(),
       }),
     );
