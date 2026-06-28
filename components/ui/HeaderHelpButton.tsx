@@ -62,115 +62,116 @@ export function HeaderHelpButton() {
             </svg>
           </button>
         </div>
-        <div className="px-5 py-4 overflow-y-auto space-y-5 text-sm text-ink-700">
+        <div className="px-5 py-5 overflow-y-auto text-sm text-ink-700 leading-relaxed">
           <p className="text-ink-600">
-            オシミセは、書籍買い周りの道中で見つけた書店・カフェ・雑貨などの「推し店」をマイキークラブ内のメンバーで集めるアプリです。
+            オシミセは、書籍買い周りの道中で見つけた書店・カフェ・雑貨などの推し店を、マイキークラブ内のメンバーで集めるアプリです。
           </p>
 
-          {/* Section: 投稿 */}
-          <section>
-            <h3 className="text-sm font-bold text-ink-900 mb-1.5">
-              ➕ お店を投稿する
+          <section className="mt-6 pt-5 border-t border-cream-200">
+            <h3 className="text-base font-bold text-ink-900 mb-3">
+              お店を投稿する
             </h3>
-            <ol className="list-decimal pl-5 space-y-1.5 text-ink-700">
+            <ol className="list-decimal pl-5 space-y-2">
               <li>
                 <span className="md:hidden">右下の「＋投稿」ボタン</span>
                 <span className="hidden md:inline">右上の「＋お店を投稿」ボタン</span>
-                を押す
+                を押します。
               </li>
-              <li>店名を入力 → 候補から選ぶと地図と店舗情報が自動表示</li>
-              <li>必要なら地図のピンをドラッグして位置を補正</li>
-              <li>価格帯(任意)・チーム・投稿者を選択</li>
               <li>
-                <strong>みんなに共有</strong>:
-                「なぜ良いか / 誰におすすめか」を一文で。料理名・食材を入れると後で検索ヒットしやすい
+                店名を入力すると候補が出るので、選ぶと地図と店舗情報が自動で表示されます。
               </li>
-              <li>写真添付(任意・最大5枚) → 「投稿する」</li>
+              <li>必要なら、地図のピンをドラッグして位置を補正します。</li>
+              <li>価格帯(任意)・チーム・投稿者を選びます。</li>
+              <li>
+                「みんなに共有」になぜ良いかを一文で書きます。料理名や食材を含めると、後で検索したときヒットしやすくなります。
+              </li>
+              <li>写真を添付(任意・最大5枚)して「投稿する」。</li>
             </ol>
-            <p className="mt-2 text-xs text-ink-500">
-              💡 入力途中で戻ったり閉じても、タブが残っていれば下書きは自動保存されます
+            <p className="mt-3 text-xs text-ink-500">
+              入力の途中で戻ったり閉じても、タブが残っていれば下書きは自動保存されています。
             </p>
           </section>
 
-          {/* Section: 探す */}
-          <section>
-            <h3 className="text-sm font-bold text-ink-900 mb-1.5">
-              🔍 推し店を探す
+          <section className="mt-6 pt-5 border-t border-cream-200">
+            <h3 className="text-base font-bold text-ink-900 mb-3">
+              推し店を探す
             </h3>
-            <ul className="space-y-1.5 text-ink-700 list-disc pl-5">
+
+            <dl className="space-y-3">
+              <div>
+                <dt className="font-semibold text-ink-900">検索バー</dt>
+                <dd className="mt-0.5 text-ink-700">
+                  店名やキーワードで横断検索します。みんなの共有本文も対象です。
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-ink-900">フィルタボタン</dt>
+                <dd className="mt-0.5 text-ink-700">
+                  都道府県やジャンルで絞り込みます。
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-ink-900">並び替え</dt>
+                <dd className="mt-0.5 text-ink-700 space-y-1">
+                  <p>
+                    <span className="font-medium text-ink-900">最近共有された順</span>
+                    (デフォルト) — 直近で話題になった店。
+                  </p>
+                  <p>
+                    <span className="font-medium text-ink-900">店の新着順</span>
+                    {' '}— 新しく登録された店。
+                  </p>
+                  <p>
+                    <span className="font-medium text-ink-900">共有件数の多い順</span>
+                    {' '}— みんなの推し度が高い店。
+                  </p>
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-ink-900">地図タブ</dt>
+                <dd className="mt-0.5 text-ink-700">
+                  地図上のピンで場所感覚で探せます。ピンをタップするとミニカードが出て、詳細に進めます。
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="mt-6 pt-5 border-t border-cream-200">
+            <h3 className="text-base font-bold text-ink-900 mb-3">
+              詳細を見る・共有を積み上げる
+            </h3>
+            <ul className="list-disc pl-5 space-y-2">
               <li>
-                <strong>検索バー</strong>: 店名・キーワードで横断検索
-                (みんなの共有本文もヒット)
+                カードや地図のピンをタップすると、写真・住所・みんなの共有が読めます。
               </li>
               <li>
-                <strong>🎚 フィルタ</strong>ボタン:
-                都道府県・ジャンルで絞り込み
+                「共有を追加」ボタンから、自分のコメントを同じ店に追加できます。
               </li>
               <li>
-                <strong>並び替え</strong>:
-                <span className="block ml-3 mt-0.5 text-xs text-ink-500">
-                  ・最近共有された順 (デフォルト): 直近で話題になった店
-                  <br />
-                  ・店の新着順: 新しく登録された店
-                  <br />
-                  ・共有件数の多い順: みんなの推し度が高い店
-                </span>
-              </li>
-              <li>
-                <strong>🗺️ 地図タブ</strong>: 地図上のピンで場所感覚で探せる。
-                ピンタップでミニカード → 詳細へ
+                同じ店をもう一度投稿しても、自動でその店にあなたの共有が追加されるだけです。重複した店舗は作られません。
               </li>
             </ul>
           </section>
 
-          {/* Section: 詳細とマージ */}
-          <section>
-            <h3 className="text-sm font-bold text-ink-900 mb-1.5">
-              📍 詳細を見る & 共有を積み上げる
+          <section className="mt-6 pt-5 border-t border-cream-200">
+            <h3 className="text-base font-bold text-ink-900 mb-3">
+              チーム表示の切替
             </h3>
-            <ul className="space-y-1.5 text-ink-700 list-disc pl-5">
-              <li>カードや地図のピンをタップ → 写真・住所・みんなの共有が読める</li>
+            <ul className="list-disc pl-5 space-y-2">
               <li>
-                <strong>+共有を追加</strong> ボタンで自分のコメントも積める
+                ヘッダーの「表示」プルダウンで、全チーム / 特定のチーム を切り替えできます。
               </li>
               <li>
-                同じ店をもう一度投稿しても、
-                <strong>自動でその店にあなたの共有が追加</strong>
-                されるだけ。重複店舗は作られません
+                チームを選ぶと、そのチームから閲覧可能な店舗だけが表示されます。閲覧範囲は管理者が設定しています。
+              </li>
+              <li>
+                選択は端末ごとに保存され、次回アクセス時もそのまま維持されます。
               </li>
             </ul>
           </section>
 
-          {/* Section: チーム表示 */}
-          <section>
-            <h3 className="text-sm font-bold text-ink-900 mb-1.5">
-              👥 チーム表示の切替
-            </h3>
-            <ul className="space-y-1.5 text-ink-700 list-disc pl-5">
-              <li>
-                ヘッダー (PCは中央) の <strong>「表示」プルダウン</strong>{' '}
-                で「全チーム / 特定チーム」を切替
-              </li>
-              <li>
-                チームを選ぶと、そのチームから閲覧可能な店舗だけが表示されます
-                (閲覧範囲は管理者が設定)
-              </li>
-              <li>選択は端末に保存され次回アクセス時も維持されます</li>
-            </ul>
-          </section>
-
-          {/* Section: ヘッダーのバッジ */}
-          <section>
-            <h3 className="text-sm font-bold text-ink-900 mb-1.5">
-              🟢 ヘッダー右上の名前
-            </h3>
-            <p className="text-ink-700">
-              前回投稿時に選んだ投稿者名が表示されます。次回投稿時もデフォルト値として使われます (端末ごと)。
-            </p>
-          </section>
-
-          <p className="text-xs text-ink-400 pt-2 border-t border-cream-200">
-            困ったことや改善要望は管理者まで。
+          <p className="mt-6 pt-5 border-t border-cream-200 text-xs text-ink-400">
+            困ったことや改善要望は管理者までお知らせください。
           </p>
         </div>
       </div>
