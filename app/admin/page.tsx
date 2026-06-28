@@ -85,7 +85,7 @@ function AdminContent() {
             ['invite', '招待'],
             ['members', 'メンバー管理'],
             ['shops', '店舗管理'],
-            ['recs', '共有管理'],
+            ['recs', '投稿管理'],
           ] as [Tab, string][]
         ).map(([id, label]) => (
           <button
