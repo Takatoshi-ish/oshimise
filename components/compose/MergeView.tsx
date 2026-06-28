@@ -9,10 +9,12 @@ import { ShareList, type Recommendation } from '@/components/shop/ShareList';
 import {
   loadLastMember,
   saveLastMember,
+  saveLastMemberName,
   loadLastTeam,
   saveLastTeam,
 } from '@/lib/draft';
 import { loadViewerTeamId } from '@/lib/viewerTeam';
+import { notifyLastMemberChanged } from '@/components/ui/HeaderUserBadge';
 
 type ShopBrief = {
   id: string;
@@ -43,6 +45,7 @@ export function MergeView({
   onAdded,
 }: Props) {
   const [memberId, setMemberId] = useState('');
+  const [memberName, setMemberName] = useState('');
   const [teamId, setTeamId] = useState('');
   const [comment, setComment] = useState('');
   const [photos, setPhotos] = useState<{ id: string; url: string }[]>([]);
@@ -80,6 +83,10 @@ export function MergeView({
         return;
       }
       saveLastMember(memberId);
+      if (memberName) {
+        saveLastMemberName(memberName);
+        notifyLastMemberChanged();
+      }
       if (teamId) saveLastTeam(teamId);
       onAdded?.();
       onClose();
@@ -153,7 +160,10 @@ export function MergeView({
               />
               <MemberSelect
                 value={memberId}
-                onChange={setMemberId}
+                onChange={(id, name) => {
+                  setMemberId(id);
+                  setMemberName(name ?? '');
+                }}
                 teamId={teamId || undefined}
               />
               <ShareInput value={comment} onChange={setComment} />

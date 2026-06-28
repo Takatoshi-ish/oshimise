@@ -101,10 +101,21 @@ function AdminContent() {
         ))}
       </nav>
 
-      {tab === 'teams' && <TeamTable />}
-      {tab === 'members' && <MemberTable />}
-      {tab === 'shops' && <ShopTable />}
-      {tab === 'recs' && <RecTable />}
+      {/* Keep all tables mounted and toggle via display so each tab's
+          internal state (scroll, in-progress edits, fetched data) survives
+          when switching back. */}
+      <div className={tab === 'teams' ? '' : 'hidden'}>
+        <TeamTable />
+      </div>
+      <div className={tab === 'members' ? '' : 'hidden'}>
+        <MemberTable />
+      </div>
+      <div className={tab === 'shops' ? '' : 'hidden'}>
+        <ShopTable />
+      </div>
+      <div className={tab === 'recs' ? '' : 'hidden'}>
+        <RecTable />
+      </div>
     </main>
   );
 }

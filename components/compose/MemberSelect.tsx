@@ -5,7 +5,7 @@ type Member = { id: string; name: string };
 
 type Props = {
   value: string;
-  onChange: (id: string) => void;
+  onChange: (id: string, name?: string) => void;
   /** If provided, only members in this team are shown. */
   teamId?: string;
 };
@@ -30,7 +30,11 @@ export function MemberSelect({ value, onChange, teamId }: Props) {
       </label>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const id = e.target.value;
+          const m = members.find((mm) => mm.id === id);
+          onChange(id, m?.name);
+        }}
         disabled={!teamId}
         className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 disabled:bg-cream-100 disabled:text-ink-400 disabled:cursor-not-allowed"
       >

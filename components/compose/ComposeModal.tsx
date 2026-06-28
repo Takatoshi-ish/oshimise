@@ -17,12 +17,14 @@ import {
   clearDraft,
   loadLastMember,
   saveLastMember,
+  saveLastMemberName,
   loadLastTeam,
   saveLastTeam,
   type DraftPayload,
   type DraftPlace,
 } from '@/lib/draft';
 import { loadViewerTeamId } from '@/lib/viewerTeam';
+import { notifyLastMemberChanged } from '@/components/ui/HeaderUserBadge';
 
 type MergeShop = {
   id: string;
@@ -81,6 +83,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
   const [area, setArea] = useState('');
   const [genre, setGenre] = useState('');
   const [memberId, setMemberId] = useState('');
+  const [memberName, setMemberName] = useState('');
   const [teamId, setTeamId] = useState('');
   const [photos, setPhotos] = useState<{ id: string; url: string }[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -215,6 +218,10 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
         return;
       }
       saveLastMember(memberId);
+      if (memberName) {
+        saveLastMemberName(memberName);
+        notifyLastMemberChanged();
+      }
       if (teamId) saveLastTeam(teamId);
       clearDraft();
       onPosted?.();
@@ -374,7 +381,10 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
               />
               <MemberSelect
                 value={memberId}
-                onChange={setMemberId}
+                onChange={(id, name) => {
+                  setMemberId(id);
+                  setMemberName(name ?? '');
+                }}
                 teamId={teamId || undefined}
               />
               <ShareInput value={comment} onChange={setComment} />

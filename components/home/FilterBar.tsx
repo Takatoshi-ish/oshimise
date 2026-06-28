@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { GENRE_SUGGESTIONS } from '@/config/data';
 
 export type Filters = {
@@ -24,15 +25,14 @@ const PREF_SUGGESTIONS = [
   '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
 
-const chipInput =
-  'rounded-full border border-cream-200 bg-cream-50 px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors';
-
 export function FilterBar({ filters, onChange }: Props) {
-  const hasAnyFilter = filters.pref || filters.genre || filters.q;
+  const [expanded, setExpanded] = useState(false);
+  const activeCount =
+    (filters.pref ? 1 : 0) + (filters.genre ? 1 : 0);
 
   return (
     <div className="space-y-3">
-      {/* Search input with icon */}
+      {/* Search input with leading icon */}
       <div className="relative">
         <span
           aria-hidden
@@ -49,58 +49,106 @@ export function FilterBar({ filters, onChange }: Props) {
         />
       </div>
 
-      {/* Filter chips row */}
-      <div className="flex gap-2 flex-wrap items-center">
-        <input
-          type="text"
-          value={filters.pref}
-          onChange={(e) => onChange({ ...filters, pref: e.target.value })}
-          placeholder="都道府県"
-          list="pref-suggestions"
-          className={`${chipInput} w-28`}
-        />
-        <datalist id="pref-suggestions">
-          {PREF_SUGGESTIONS.map((p) => (
-            <option key={p} value={p} />
-          ))}
-        </datalist>
-        <input
-          type="text"
-          value={filters.genre}
-          onChange={(e) => onChange({ ...filters, genre: e.target.value })}
-          placeholder="ジャンル"
-          list="genre-suggestions"
-          className={`${chipInput} w-28`}
-        />
-        <datalist id="genre-suggestions">
-          {GENRE_SUGGESTIONS.map((g) => (
-            <option key={g} value={g} />
-          ))}
-        </datalist>
+      {/* Sort (left) + Filter toggle (right) */}
+      <div className="flex items-center justify-between gap-2">
         <select
           value={filters.sort}
           onChange={(e) =>
             onChange({ ...filters, sort: e.target.value as Filters['sort'] })
           }
-          className={`${chipInput} pr-3 cursor-pointer`}
+          className="rounded-full border border-cream-200 bg-white px-3.5 py-1.5 text-sm font-medium text-ink-700 focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 cursor-pointer"
           aria-label="並び替え"
         >
-          <option value="new">店の新着順</option>
           <option value="recent_share">最近共有された順</option>
+          <option value="new">店の新着順</option>
           <option value="count">共有件数の多い順</option>
         </select>
-        {hasAnyFilter && (
-          <button
-            type="button"
-            onClick={() =>
-              onChange({ pref: '', genre: '', q: '', sort: filters.sort })
-            }
-            className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+            expanded || activeCount > 0
+              ? 'bg-coral-50 border-coral-200 text-coral-700 hover:bg-coral-100'
+              : 'bg-white border-cream-200 text-ink-700 hover:bg-cream-100'
+          }`}
+        >
+          <span aria-hidden>🎚</span>
+          フィルタ
+          {activeCount > 0 && (
+            <span className="ml-0.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-coral-500 text-white text-[10px] font-bold">
+              {activeCount}
+            </span>
+          )}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+            className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
           >
-            クリア
-          </button>
-        )}
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
       </div>
+
+      {/* Expandable filter panel */}
+      {expanded && (
+        <div className="rounded-2xl border border-cream-200 bg-white p-3 space-y-2.5 shadow-soft">
+          <div>
+            <label className="text-[11px] text-ink-500 font-semibold">
+              都道府県
+            </label>
+            <input
+              type="text"
+              value={filters.pref}
+              onChange={(e) => onChange({ ...filters, pref: e.target.value })}
+              placeholder="例: 東京都"
+              list="pref-suggestions"
+              className="mt-0.5 w-full rounded-full border border-cream-200 bg-white px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
+            />
+            <datalist id="pref-suggestions">
+              {PREF_SUGGESTIONS.map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label className="text-[11px] text-ink-500 font-semibold">
+              ジャンル
+            </label>
+            <input
+              type="text"
+              value={filters.genre}
+              onChange={(e) => onChange({ ...filters, genre: e.target.value })}
+              placeholder="例: カフェ"
+              list="genre-suggestions"
+              className="mt-0.5 w-full rounded-full border border-cream-200 bg-white px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
+            />
+            <datalist id="genre-suggestions">
+              {GENRE_SUGGESTIONS.map((g) => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
+          </div>
+          {activeCount > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                onChange({ pref: '', genre: '', q: filters.q, sort: filters.sort })
+              }
+              className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
+            >
+              フィルタをクリア
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

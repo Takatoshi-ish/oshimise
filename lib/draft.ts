@@ -1,5 +1,6 @@
 const DRAFT_KEY = 'oshimise:draft';
 const LAST_MEMBER_KEY = 'oshimise:lastMember';
+const LAST_MEMBER_NAME_KEY = 'oshimise:lastMemberName';
 const LAST_TEAM_KEY = 'oshimise:lastTeam';
 
 export type DraftPlace = {
@@ -56,6 +57,16 @@ export function loadLastMember(): string | null {
 export function saveLastMember(memberId: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(LAST_MEMBER_KEY, memberId);
+}
+
+export function loadLastMemberName(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(LAST_MEMBER_NAME_KEY);
+}
+
+export function saveLastMemberName(name: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(LAST_MEMBER_NAME_KEY, name);
 }
 
 export function loadLastTeam(): string | null {
