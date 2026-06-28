@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 type Props = { children: React.ReactNode };
 
@@ -51,7 +52,12 @@ export function PasscodeGate({ children }: Props) {
   if (status === 'unauth') {
     return (
       <div className="p-4 max-w-sm mx-auto">
-        <h1 className="text-lg font-bold mb-4">管理画面</h1>
+        <div className="flex items-center gap-2.5 mb-4">
+          <AppLogo size={28} />
+          <h1 className="text-lg font-extrabold tracking-tight text-ink-900">
+            管理画面
+          </h1>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <label className="block text-sm">
             パスコード

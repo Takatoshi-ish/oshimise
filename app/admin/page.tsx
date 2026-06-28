@@ -6,6 +6,7 @@ import { MemberTable } from '@/components/admin/MemberTable';
 import { ShopTable } from '@/components/admin/ShopTable';
 import { RecTable } from '@/components/admin/RecTable';
 import { TeamTable } from '@/components/admin/TeamTable';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 type Tab = 'teams' | 'members' | 'shops' | 'recs';
 
@@ -49,7 +50,12 @@ function AdminContent() {
         </Link>
       </div>
       <header className="flex justify-between items-center mb-4 border-b border-cream-100 pb-3 flex-wrap gap-2">
-        <h1 className="text-xl font-bold tracking-tight text-ink-900">管理画面</h1>
+        <div className="flex items-center gap-2.5">
+          <AppLogo size={28} />
+          <h1 className="text-xl font-extrabold tracking-tight text-ink-900">
+            管理画面
+          </h1>
+        </div>
         <div className="flex gap-3 items-center text-sm">
           {sheetsUrl && (
             <a
