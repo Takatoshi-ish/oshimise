@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
 import { ConfirmDialog } from './ConfirmDialog';
 import { TeamVisibilityDialog } from './TeamVisibilityDialog';
-import { InvitationCard } from './InvitationCard';
 
 export type AdminTeam = {
   id: string;
@@ -115,7 +114,6 @@ export function TeamTable() {
 
   return (
     <div className="space-y-4">
-      <InvitationCard />
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>

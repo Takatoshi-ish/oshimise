@@ -6,9 +6,10 @@ import { MemberTable } from '@/components/admin/MemberTable';
 import { ShopTable } from '@/components/admin/ShopTable';
 import { RecTable } from '@/components/admin/RecTable';
 import { TeamTable } from '@/components/admin/TeamTable';
+import { InvitationCard } from '@/components/admin/InvitationCard';
 import { AppLogo } from '@/components/ui/AppLogo';
 
-type Tab = 'teams' | 'members' | 'shops' | 'recs';
+type Tab = 'teams' | 'invite' | 'members' | 'shops' | 'recs';
 
 function AdminContent() {
   const [tab, setTab] = useState<Tab>('teams');
@@ -81,6 +82,7 @@ function AdminContent() {
         {(
           [
             ['teams', 'チーム管理'],
+            ['invite', '招待'],
             ['members', 'メンバー管理'],
             ['shops', '店舗管理'],
             ['recs', '共有管理'],
@@ -106,6 +108,9 @@ function AdminContent() {
           when switching back. */}
       <div className={tab === 'teams' ? '' : 'hidden'}>
         <TeamTable />
+      </div>
+      <div className={tab === 'invite' ? '' : 'hidden'}>
+        <InvitationCard />
       </div>
       <div className={tab === 'members' ? '' : 'hidden'}>
         <MemberTable />
