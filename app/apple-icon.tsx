@@ -1,12 +1,10 @@
 import { ImageResponse } from 'next/og';
 
-export const size = { width: 64, height: 64 };
+export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
-// オシミセ favicon
-// Coral rounded-square tile (matches the dot accent in the header)
-// with a white location-pin glyph centered — represents "marking a favorite spot".
-export default function Icon() {
+// iOS home-screen icon
+export default function AppleIcon() {
   return new ImageResponse(
     (
       <div
@@ -14,15 +12,15 @@ export default function Icon() {
           width: '100%',
           height: '100%',
           background: 'linear-gradient(135deg, #FF6F61 0%, #FF5547 100%)',
-          borderRadius: '14px',
+          borderRadius: '40px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <svg
-          width="42"
-          height="42"
+          width="120"
+          height="120"
           viewBox="0 0 24 24"
           fill="white"
           xmlns="http://www.w3.org/2000/svg"
