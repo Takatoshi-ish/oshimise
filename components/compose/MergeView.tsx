@@ -1,11 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { TeamSelect } from './TeamSelect';
 import { MemberSelect } from './MemberSelect';
 import { ShareInput } from './ShareInput';
 import { PhotoUploader } from './PhotoUploader';
 import { Spinner } from '@/components/ui/Spinner';
 import { ShareList, type Recommendation } from '@/components/shop/ShareList';
-import { loadLastMember, saveLastMember } from '@/lib/draft';
+import {
+  loadLastMember,
+  saveLastMember,
+  loadLastTeam,
+  saveLastTeam,
+} from '@/lib/draft';
+import { loadViewerTeamId } from '@/lib/viewerTeam';
 
 type ShopBrief = {
   id: string;
@@ -36,6 +43,7 @@ export function MergeView({
   onAdded,
 }: Props) {
   const [memberId, setMemberId] = useState('');
+  const [teamId, setTeamId] = useState('');
   const [comment, setComment] = useState('');
   const [photos, setPhotos] = useState<{ id: string; url: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -44,6 +52,8 @@ export function MergeView({
   useEffect(() => {
     const last = loadLastMember();
     if (last) setMemberId(last);
+    const t = loadLastTeam() ?? loadViewerTeamId() ?? '';
+    if (t) setTeamId(t);
   }, []);
 
   const handleSubmit = async () => {
@@ -70,6 +80,7 @@ export function MergeView({
         return;
       }
       saveLastMember(memberId);
+      if (teamId) saveLastTeam(teamId);
       onAdded?.();
       onClose();
     } catch {
@@ -133,7 +144,18 @@ export function MergeView({
           <div className="border-t border-cream-200 pt-4">
             <h3 className="text-sm font-semibold text-ink-900 mb-3">あなたの共有を追加</h3>
             <div className="space-y-4">
-              <MemberSelect value={memberId} onChange={setMemberId} />
+              <TeamSelect
+                value={teamId}
+                onChange={(t) => {
+                  setTeamId(t);
+                  setMemberId('');
+                }}
+              />
+              <MemberSelect
+                value={memberId}
+                onChange={setMemberId}
+                teamId={teamId || undefined}
+              />
               <ShareInput value={comment} onChange={setComment} />
               <PhotoUploader
                 memberId={memberId}

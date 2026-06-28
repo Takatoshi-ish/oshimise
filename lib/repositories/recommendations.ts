@@ -143,6 +143,7 @@ export async function listFeed(filters: {
   pref?: string | null;
   genre?: string | null;
   offset?: number;
+  visibleTeamIds?: string[] | null;
 }): Promise<FeedItem[]> {
   const r = await query<FeedRow>(
     `SELECT
@@ -156,9 +157,15 @@ export async function listFeed(filters: {
      WHERE
        ($1::text IS NULL OR s.pref = $1)
        AND ($2::text IS NULL OR s.genre = $2)
+       AND ($4::uuid[] IS NULL OR m.team_id = ANY($4::uuid[]))
      ORDER BY r.created_at DESC
      LIMIT 50 OFFSET $3`,
-    [filters.pref ?? null, filters.genre ?? null, filters.offset ?? 0],
+    [
+      filters.pref ?? null,
+      filters.genre ?? null,
+      filters.offset ?? 0,
+      filters.visibleTeamIds ?? null,
+    ],
   );
   return r.rows.map((x) => ({
     recommendationId: x.recommendation_id,

@@ -47,3 +47,27 @@ CREATE INDEX IF NOT EXISTS idx_shops_genre              ON shops(genre);
 CREATE INDEX IF NOT EXISTS idx_recommendations_shop_id  ON recommendations(shop_id);
 CREATE INDEX IF NOT EXISTS idx_recommendations_created  ON recommendations(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_photos_shop_id           ON photos(shop_id);
+
+-- ===========================================================================
+-- Phase 1: teams + per-team visibility
+-- ===========================================================================
+
+CREATE TABLE IF NOT EXISTS teams (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       text NOT NULL,
+  active     boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 「viewer_team が visible_team の投稿を見れる」ことを表す方向性グラフ。
+-- 自分自身は常に見える(SQL側でORで処理)ので登録不要。
+CREATE TABLE IF NOT EXISTS team_visibility (
+  viewer_team_id  uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  visible_team_id uuid NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+  PRIMARY KEY (viewer_team_id, visible_team_id)
+);
+
+-- ADD COLUMN IF NOT EXISTS (PG9.6+)
+ALTER TABLE members ADD COLUMN IF NOT EXISTS team_id uuid REFERENCES teams(id);
+
+CREATE INDEX IF NOT EXISTS idx_members_team_id ON members(team_id);

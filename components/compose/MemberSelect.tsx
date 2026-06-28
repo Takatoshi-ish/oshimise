@@ -6,18 +6,23 @@ type Member = { id: string; name: string };
 type Props = {
   value: string;
   onChange: (id: string) => void;
+  /** If provided, only members in this team are shown. */
+  teamId?: string;
 };
 
-export function MemberSelect({ value, onChange }: Props) {
+export function MemberSelect({ value, onChange, teamId }: Props) {
   const [members, setMembers] = useState<Member[]>([]);
   useEffect(() => {
-    fetch('/api/members')
+    const url = teamId
+      ? `/api/members?teamId=${encodeURIComponent(teamId)}`
+      : '/api/members';
+    fetch(url)
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setMembers(data);
       })
       .catch(() => setMembers([]));
-  }, []);
+  }, [teamId]);
   return (
     <div>
       <label className="block text-sm font-semibold text-ink-900 mb-1.5">
@@ -26,9 +31,12 @@ export function MemberSelect({ value, onChange }: Props) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
+        disabled={!teamId}
+        className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 disabled:bg-cream-100 disabled:text-ink-400 disabled:cursor-not-allowed"
       >
-        <option value="">— 選択 —</option>
+        <option value="">
+          {teamId ? '— 選択 —' : '— 先にチームを選択 —'}
+        </option>
         {members.map((m) => (
           <option key={m.id} value={m.id}>
             {m.name}

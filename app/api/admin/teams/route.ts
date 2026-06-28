@@ -1,15 +1,18 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { isAdmin } from '@/lib/admin-auth';
-import { listAllMembers, insertMember } from '@/lib/repositories/members';
-import { appendMember, fireAndForget } from '@/lib/sheets';
+import {
+  listAllTeams,
+  insertTeam,
+  getTeamMemberCounts,
+  getAllVisibility,
+} from '@/lib/repositories/teams';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const PostBody = z.object({
   name: z.string().trim().min(1).max(30),
-  teamId: z.string().uuid().nullable().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -19,8 +22,18 @@ export async function GET(req: NextRequest) {
       { status: 401 },
     );
   }
-  const members = await listAllMembers();
-  return NextResponse.json(members);
+  const [teams, counts, visibility] = await Promise.all([
+    listAllTeams(),
+    getTeamMemberCounts(),
+    getAllVisibility(),
+  ]);
+  return NextResponse.json(
+    teams.map((t) => ({
+      ...t,
+      memberCount: counts.get(t.id) ?? 0,
+      visibleTeamIds: visibility.get(t.id) ?? [],
+    })),
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -46,14 +59,6 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  const member = await insertMember(parsed.data.name, parsed.data.teamId ?? null);
-  fireAndForget(
-    'admin member POST',
-    appendMember({
-      name: member.name,
-      active: member.active,
-      createdAt: member.createdAt,
-    }),
-  );
-  return NextResponse.json(member, { status: 201 });
+  const team = await insertTeam(parsed.data.name);
+  return NextResponse.json(team, { status: 201 });
 }

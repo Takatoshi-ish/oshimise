@@ -5,11 +5,12 @@ import { PasscodeGate } from '@/components/admin/PasscodeGate';
 import { MemberTable } from '@/components/admin/MemberTable';
 import { ShopTable } from '@/components/admin/ShopTable';
 import { RecTable } from '@/components/admin/RecTable';
+import { TeamTable } from '@/components/admin/TeamTable';
 
-type Tab = 'members' | 'shops' | 'recs';
+type Tab = 'teams' | 'members' | 'shops' | 'recs';
 
 function AdminContent() {
-  const [tab, setTab] = useState<Tab>('members');
+  const [tab, setTab] = useState<Tab>('teams');
   const [sheetsUrl, setSheetsUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ function AdminContent() {
       <nav className="flex gap-1 mb-4 border-b border-neutral-200">
         {(
           [
+            ['teams', 'チーム管理'],
             ['members', 'メンバー管理'],
             ['shops', '店舗管理'],
             ['recs', '共有管理'],
@@ -93,6 +95,7 @@ function AdminContent() {
         ))}
       </nav>
 
+      {tab === 'teams' && <TeamTable />}
       {tab === 'members' && <MemberTable />}
       {tab === 'shops' && <ShopTable />}
       {tab === 'recs' && <RecTable />}

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { PlaceSearch, type PlaceSuggestion } from './PlaceSearch';
 import { MapPreview } from './MapPreview';
 import { PriceSelector } from './PriceSelector';
+import { TeamSelect } from './TeamSelect';
 import { MemberSelect } from './MemberSelect';
 import { ShareInput } from './ShareInput';
 import { PhotoUploader } from './PhotoUploader';
@@ -16,9 +17,12 @@ import {
   clearDraft,
   loadLastMember,
   saveLastMember,
+  loadLastTeam,
+  saveLastTeam,
   type DraftPayload,
   type DraftPlace,
 } from '@/lib/draft';
+import { loadViewerTeamId } from '@/lib/viewerTeam';
 
 type MergeShop = {
   id: string;
@@ -77,6 +81,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
   const [area, setArea] = useState('');
   const [genre, setGenre] = useState('');
   const [memberId, setMemberId] = useState('');
+  const [teamId, setTeamId] = useState('');
   const [photos, setPhotos] = useState<{ id: string; url: string }[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -98,11 +103,15 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
       setArea(draft.area);
       setGenre(draft.genre);
       setMemberId(draft.memberId);
+      setTeamId(draft.teamId ?? loadLastTeam() ?? loadViewerTeamId() ?? '');
       setPhotos(draft.photos);
       setRestored(true);
     } else {
-      const last = loadLastMember();
-      if (last) setMemberId(last);
+      const lastM = loadLastMember();
+      if (lastM) setMemberId(lastM);
+      // Team defaults: last-used team → viewer team → blank
+      const initialTeam = loadLastTeam() ?? loadViewerTeamId() ?? '';
+      if (initialTeam) setTeamId(initialTeam);
     }
     setHydrated(true);
   }, []);
@@ -122,6 +131,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
       area,
       genre,
       memberId,
+      teamId,
       photos,
     };
     saveDraft(payload);
@@ -135,6 +145,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
     area,
     genre,
     memberId,
+    teamId,
     photos,
   ]);
 
@@ -204,6 +215,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
         return;
       }
       saveLastMember(memberId);
+      if (teamId) saveLastTeam(teamId);
       clearDraft();
       onPosted?.();
       onClose();
@@ -225,6 +237,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
     setArea('');
     setGenre('');
     setPhotos([]);
+    // keep teamId so the user doesn't have to re-pick after starting over
     setRestored(false);
   };
 
@@ -350,7 +363,20 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
                 />
               </div>
               <PriceSelector value={priceLevel} onChange={setPriceLevel} />
-              <MemberSelect value={memberId} onChange={setMemberId} />
+              <TeamSelect
+                value={teamId}
+                onChange={(t) => {
+                  setTeamId(t);
+                  // member list changes with team → clear member to avoid
+                  // submitting a member from a different team
+                  setMemberId('');
+                }}
+              />
+              <MemberSelect
+                value={memberId}
+                onChange={setMemberId}
+                teamId={teamId || undefined}
+              />
               <ShareInput value={comment} onChange={setComment} />
               <PhotoUploader
                 memberId={memberId}

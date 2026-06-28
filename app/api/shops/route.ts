@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { withTransaction } from '@/lib/db';
 import { PostShopSchema } from '@/lib/validation';
 import { upsertShop, listShopCards } from '@/lib/repositories/shops';
+import { listVisibleTeamIds } from '@/lib/repositories/teams';
 import {
   insertRecommendation,
   MemberInactiveError,
@@ -26,6 +27,7 @@ const ListQuerySchema = z.object({
   genre: z.string().trim().min(1).max(30).optional().nullable(),
   q: z.string().trim().min(1).max(100).optional().nullable(),
   sort: z.enum(['new', 'count', 'recent_share']).default('new'),
+  viewerTeamId: z.string().uuid().optional().nullable(),
 });
 
 export async function GET(req: NextRequest) {
@@ -37,6 +39,7 @@ export async function GET(req: NextRequest) {
     genre: sp.get('genre') || null,
     q: sp.get('q') || null,
     sort: sp.get('sort') || 'new',
+    viewerTeamId: sp.get('viewerTeamId') || null,
   });
   if (!parsed.success) {
     return NextResponse.json(
@@ -45,7 +48,10 @@ export async function GET(req: NextRequest) {
     );
   }
   try {
-    const cards = await listShopCards(parsed.data, parsed.data.sort);
+    const visibleTeamIds = parsed.data.viewerTeamId
+      ? await listVisibleTeamIds(parsed.data.viewerTeamId)
+      : null;
+    const cards = await listShopCards(parsed.data, parsed.data.sort, visibleTeamIds);
     return NextResponse.json(cards);
   } catch (e) {
     console.error('/api/shops GET error', e);

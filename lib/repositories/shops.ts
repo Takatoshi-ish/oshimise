@@ -74,6 +74,23 @@ export async function findShopById(id: string): Promise<Shop | null> {
   return r.rows[0] ? toShop(r.rows[0]) : null;
 }
 
+/** Returns true if any recommendation on this shop comes from a visible team. */
+export async function isShopVisibleToTeams(
+  shopId: string,
+  visibleTeamIds: string[],
+): Promise<boolean> {
+  if (visibleTeamIds.length === 0) return false;
+  const r = await query<{ exists: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1 FROM recommendations r
+       JOIN members m ON m.id = r.member_id
+       WHERE r.shop_id = $1 AND m.team_id = ANY($2::uuid[])
+     ) AS exists`,
+    [shopId, visibleTeamIds],
+  );
+  return r.rows[0]?.exists === true;
+}
+
 export type ShopInsert = {
   placeId: string;
   name: string;
@@ -161,6 +178,7 @@ type CardRow = {
 export async function listShopCards(
   filters: ShopListFilters,
   sort: 'new' | 'count' | 'recent_share',
+  visibleTeamIds: string[] | null,
 ): Promise<ShopCard[]> {
   const orderBy =
     sort === 'count'
@@ -168,6 +186,7 @@ export async function listShopCards(
       : sort === 'recent_share'
         ? '(SELECT MAX(created_at) FROM recommendations WHERE shop_id = s.id) DESC NULLS LAST, s.created_at DESC'
         : 's.created_at DESC';
+  // visibility filter: when null → no filter (admin); when [] → see nothing
   const r = await query<CardRow>(
     `SELECT
        s.id, s.name, s.genre, s.pref, s.city, s.area,
@@ -193,6 +212,14 @@ export async function listShopCards(
            WHERE rr.shop_id = s.id AND rr.comment ILIKE '%' || $5 || '%'
          )
        )
+       AND (
+         $6::uuid[] IS NULL
+         OR EXISTS (
+           SELECT 1 FROM recommendations rv
+           JOIN members mv ON mv.id = rv.member_id
+           WHERE rv.shop_id = s.id AND mv.team_id = ANY($6::uuid[])
+         )
+       )
      GROUP BY s.id
      ORDER BY ${orderBy}
      LIMIT 50`,
@@ -202,6 +229,7 @@ export async function listShopCards(
       filters.area ?? null,
       filters.genre ?? null,
       filters.q ?? null,
+      visibleTeamIds,
     ],
   );
   return r.rows.map((x) => ({

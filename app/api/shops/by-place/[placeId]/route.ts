@@ -1,12 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { findShopByPlaceId } from '@/lib/repositories/shops';
+import { findShopByPlaceId, isShopVisibleToTeams } from '@/lib/repositories/shops';
 import { listRecommendationsByShop } from '@/lib/repositories/recommendations';
+import { listVisibleTeamIds } from '@/lib/repositories/teams';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ placeId: string }> },
 ) {
   const { placeId } = await params;
@@ -22,6 +23,17 @@ export async function GET(
       { error: { code: 'NOT_FOUND', message: 'not found' } },
       { status: 404 },
     );
+  }
+  const viewerTeamId = req.nextUrl.searchParams.get('viewerTeamId') || null;
+  if (viewerTeamId) {
+    const visible = await listVisibleTeamIds(viewerTeamId);
+    const ok = await isShopVisibleToTeams(shop.id, visible);
+    if (!ok) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'not found' } },
+        { status: 404 },
+      );
+    }
   }
   const recommendations = await listRecommendationsByShop(shop.id);
   return NextResponse.json({ shop, recommendations });
