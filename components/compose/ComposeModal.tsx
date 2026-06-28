@@ -59,7 +59,13 @@ function toDraftPlace(p: PlaceDetails): DraftPlace {
   };
 }
 
-export function ComposeModal({ onClose }: { onClose: () => void }) {
+type ComposeProps = {
+  onClose: () => void;
+  /** Called after a successful post or share-add so the caller can refetch. */
+  onPosted?: () => void;
+};
+
+export function ComposeModal({ onClose, onPosted }: ComposeProps) {
   const router = useRouter();
 
   const [sessionToken] = useState(() => crypto.randomUUID());
@@ -199,6 +205,7 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
       }
       saveLastMember(memberId);
       clearDraft();
+      onPosted?.();
       onClose();
       router.refresh();
     } catch {
@@ -233,6 +240,7 @@ export function ComposeModal({ onClose }: { onClose: () => void }) {
         }}
         onAdded={() => {
           clearDraft();
+          onPosted?.();
           router.refresh();
         }}
       />

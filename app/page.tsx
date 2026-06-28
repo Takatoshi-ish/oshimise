@@ -29,6 +29,7 @@ export default function HomePage() {
   const [shops, setShops] = useState<ShopCard[]>([]);
   const [shopsLoading, setShopsLoading] = useState(false);
   const [composing, setComposing] = useState(false);
+  const [refetchKey, setRefetchKey] = useState(0);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function HomePage() {
     return () => {
       if (fetchTimer.current) clearTimeout(fetchTimer.current);
     };
-  }, [filters]);
+  }, [filters, refetchKey]);
 
   useEffect(() => {
     if (!composing) return;
@@ -123,7 +124,12 @@ export default function HomePage() {
 
       <BottomNav active={tab} onChange={setTab} />
 
-      {composing && <ComposeModal onClose={closeModal} />}
+      {composing && (
+        <ComposeModal
+          onClose={closeModal}
+          onPosted={() => setRefetchKey((k) => k + 1)}
+        />
+      )}
     </main>
   );
 }
