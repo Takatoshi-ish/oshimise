@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { isAdmin } from '@/lib/admin-auth';
-import { updateMember } from '@/lib/repositories/members';
+import {
+  updateMember,
+  deleteMemberIfNoRecommendations,
+} from '@/lib/repositories/members';
 import { appendMember, fireAndForget } from '@/lib/sheets';
 
 export const runtime = 'nodejs';
@@ -59,4 +62,35 @@ export async function PATCH(
     );
   }
   return NextResponse.json(updated);
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!(await isAdmin(req))) {
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'unauthorized' } },
+      { status: 401 },
+    );
+  }
+  const { id } = await params;
+  const r = await deleteMemberIfNoRecommendations(id);
+  if (r.deleted) return NextResponse.json({ ok: true });
+  if (r.reason === 'has_recommendations') {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'VALIDATION',
+          message:
+            'このメンバーには投稿(共有)が紐づいているため削除できません。代わりに「無効化」を使ってください。',
+        },
+      },
+      { status: 400 },
+    );
+  }
+  return NextResponse.json(
+    { error: { code: 'NOT_FOUND', message: 'not found' } },
+    { status: 404 },
+  );
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
+import { ConfirmDialog } from './ConfirmDialog';
 
 type Member = {
   id: string;
@@ -23,6 +24,8 @@ export function MemberTable() {
   const [newName, setNewName] = useState('');
   const [newTeamId, setNewTeamId] = useState<string>('');
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Member | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -94,6 +97,26 @@ export function MemberTable() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !m.active }),
       });
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setBusy(true);
+    setDeleteError(null);
+    try {
+      const r = await fetch(`/api/admin/members/${confirmDelete.id}`, {
+        method: 'DELETE',
+      });
+      if (!r.ok) {
+        const err = await r.json().catch(() => null);
+        setDeleteError(err?.error?.message ?? '削除に失敗しました');
+        return;
+      }
+      setConfirmDelete(null);
       await load();
     } finally {
       setBusy(false);
@@ -202,6 +225,17 @@ export function MemberTable() {
                         >
                           {m.active ? '無効化' : '有効化'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConfirmDelete(m);
+                            setDeleteError(null);
+                          }}
+                          disabled={busy}
+                          className="text-xs underline text-coral-600 disabled:opacity-40"
+                        >
+                          削除
+                        </button>
                       </>
                     )}
                   </td>
@@ -240,6 +274,24 @@ export function MemberTable() {
           ＋ 追加
         </button>
       </div>
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title="メンバーを削除"
+          message={
+            deleteError
+              ? deleteError
+              : `「${confirmDelete.name}」を削除します。\nこの操作は取り消せません。\n\n※ このメンバーが投稿(共有)を1件でも持っている場合は削除できません。その場合は「無効化」を使ってください。`
+          }
+          confirmLabel={busy ? '削除中...' : '削除する'}
+          destructive
+          onConfirm={handleDelete}
+          onCancel={() => {
+            setConfirmDelete(null);
+            setDeleteError(null);
+          }}
+        />
+      )}
     </div>
   );
 }

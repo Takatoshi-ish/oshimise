@@ -64,6 +64,36 @@ export async function insertMember(
   return toMember(r.rows[0]);
 }
 
+export type DeleteMemberResult =
+  | { deleted: true }
+  | { deleted: false; reason: 'has_recommendations' | 'not_found' };
+
+/**
+ * Hard-delete a member. Blocks if the member still has at least one
+ * recommendation, because recommendations.member_id is ON DELETE RESTRICT
+ * and we want to surface the conflict as a friendly admin message
+ * instead of leaking a Postgres FK error.
+ */
+export async function deleteMemberIfNoRecommendations(
+  id: string,
+): Promise<DeleteMemberResult> {
+  if (!UUID_RE.test(id)) return { deleted: false, reason: 'not_found' };
+  const r = await query<{ c: string }>(
+    'SELECT COUNT(*)::text AS c FROM recommendations WHERE member_id = $1',
+    [id],
+  );
+  if (Number(r.rows[0].c) > 0) {
+    return { deleted: false, reason: 'has_recommendations' };
+  }
+  const del = await query<{ id: string }>(
+    'DELETE FROM members WHERE id = $1 RETURNING id',
+    [id],
+  );
+  return del.rows.length > 0
+    ? { deleted: true }
+    : { deleted: false, reason: 'not_found' };
+}
+
 export async function updateMember(
   id: string,
   patch: { name?: string; active?: boolean; teamId?: string | null },
