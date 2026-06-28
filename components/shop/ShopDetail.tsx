@@ -51,12 +51,25 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
 
   return (
     <main className="p-4 pb-24 max-w-2xl mx-auto space-y-5">
-      <div className="flex items-center gap-2 text-sm">
+      <div>
         <Link
           href="/"
-          className="text-ink-500 hover:text-coral-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-coral-600 px-3 py-1.5 rounded-full bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50 transition-colors"
         >
-          ← ホーム
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          ホームに戻る
         </Link>
       </div>
 
