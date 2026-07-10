@@ -14,25 +14,61 @@ type Props = {
   onChange: (next: Filters) => void;
 };
 
-const PREF_SUGGESTIONS = [
-  '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
-  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+// Curated "よく使う" prefectures shown as chips. The remaining prefectures are
+// reachable via the "他の都道府県 ▾" toggle so the panel stays scannable.
+const POPULAR_PREFS = [
+  '東京都', '神奈川県', '埼玉県', '千葉県',
+  '大阪府', '京都府', '兵庫県',
+  '愛知県', '福岡県', '北海道',
+];
+
+const OTHER_PREFS = [
+  '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+  '茨城県', '栃木県', '群馬県',
   '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県',
-  '岐阜県', '静岡県', '愛知県', '三重県',
-  '滋賀県', '京都府', '大阪府', '兵庫県', '奈良県', '和歌山県',
+  '岐阜県', '静岡県', '三重県',
+  '滋賀県', '奈良県', '和歌山県',
   '鳥取県', '島根県', '岡山県', '広島県', '山口県',
   '徳島県', '香川県', '愛媛県', '高知県',
-  '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
+  '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
+
+function ChipButton({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap ${
+        selected
+          ? 'bg-coral-500 text-white border-coral-500 font-semibold'
+          : 'bg-white text-ink-700 border-cream-200 hover:border-coral-300 hover:bg-coral-50'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export function FilterBar({ filters, onChange }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [showAllPrefs, setShowAllPrefs] = useState(false);
   const activeCount =
     (filters.pref ? 1 : 0) + (filters.genre ? 1 : 0);
 
+  const setPref = (v: string) => onChange({ ...filters, pref: v });
+  const setGenre = (v: string) => onChange({ ...filters, genre: v });
+
   return (
     <div className="space-y-3">
-      {/* Search input with leading icon */}
+      {/* Search input */}
       <div className="relative">
         <span
           aria-hidden
@@ -99,52 +135,108 @@ export function FilterBar({ filters, onChange }: Props) {
 
       {/* Expandable filter panel */}
       {expanded && (
-        <div className="rounded-2xl border border-cream-200 bg-white p-3 space-y-2.5 shadow-soft">
-          <div>
-            <label className="text-[11px] text-ink-500 font-semibold">
-              都道府県
-            </label>
-            <input
-              type="text"
-              value={filters.pref}
-              onChange={(e) => onChange({ ...filters, pref: e.target.value })}
-              placeholder="例: 東京都"
-              list="pref-suggestions"
-              className="mt-0.5 w-full rounded-full border border-cream-200 bg-white px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
-            />
-            <datalist id="pref-suggestions">
-              {PREF_SUGGESTIONS.map((p) => (
-                <option key={p} value={p} />
+        <div className="rounded-2xl border border-cream-200 bg-white p-4 space-y-5 shadow-soft">
+          {/* 都道府県 */}
+          <section>
+            <div className="flex items-baseline justify-between mb-2">
+              <h4 className="text-sm font-bold text-ink-900">都道府県</h4>
+              {filters.pref && (
+                <button
+                  type="button"
+                  onClick={() => setPref('')}
+                  className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
+                >
+                  クリア
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {POPULAR_PREFS.map((p) => (
+                <ChipButton
+                  key={p}
+                  label={p}
+                  selected={filters.pref === p}
+                  onClick={() => setPref(filters.pref === p ? '' : p)}
+                />
               ))}
-            </datalist>
-          </div>
-          <div>
-            <label className="text-[11px] text-ink-500 font-semibold">
-              ジャンル
-            </label>
+              <button
+                type="button"
+                onClick={() => setShowAllPrefs((v) => !v)}
+                className="text-sm px-3 py-1.5 rounded-full border border-dashed border-cream-200 text-ink-500 hover:border-coral-300 hover:text-coral-600 transition-colors whitespace-nowrap"
+              >
+                {showAllPrefs ? '閉じる' : '他の都道府県 ▾'}
+              </button>
+            </div>
+            {showAllPrefs && (
+              <div className="mt-2 flex flex-wrap gap-1.5 pt-2 border-t border-cream-100">
+                {OTHER_PREFS.map((p) => (
+                  <ChipButton
+                    key={p}
+                    label={p}
+                    selected={filters.pref === p}
+                    onClick={() => setPref(filters.pref === p ? '' : p)}
+                  />
+                ))}
+              </div>
+            )}
+            {/* Free-text fallback for anything else the chips don't cover */}
             <input
               type="text"
-              value={filters.genre}
-              onChange={(e) => onChange({ ...filters, genre: e.target.value })}
-              placeholder="例: カフェ"
-              list="genre-suggestions"
-              className="mt-0.5 w-full rounded-full border border-cream-200 bg-white px-3.5 py-1.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 transition-colors"
+              value={
+                POPULAR_PREFS.includes(filters.pref) ||
+                OTHER_PREFS.includes(filters.pref)
+                  ? ''
+                  : filters.pref
+              }
+              onChange={(e) => setPref(e.target.value)}
+              placeholder="上記以外を入力"
+              className="mt-3 w-full rounded-xl border border-cream-200 bg-cream-50 px-3.5 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
             />
-            <datalist id="genre-suggestions">
+          </section>
+
+          {/* ジャンル */}
+          <section className="pt-4 border-t border-cream-100">
+            <div className="flex items-baseline justify-between mb-2">
+              <h4 className="text-sm font-bold text-ink-900">ジャンル</h4>
+              {filters.genre && (
+                <button
+                  type="button"
+                  onClick={() => setGenre('')}
+                  className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
+                >
+                  クリア
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
               {GENRE_SUGGESTIONS.map((g) => (
-                <option key={g} value={g} />
+                <ChipButton
+                  key={g}
+                  label={g}
+                  selected={filters.genre === g}
+                  onClick={() => setGenre(filters.genre === g ? '' : g)}
+                />
               ))}
-            </datalist>
-          </div>
+            </div>
+            {/* Free-text fallback */}
+            <input
+              type="text"
+              value={GENRE_SUGGESTIONS.includes(filters.genre) ? '' : filters.genre}
+              onChange={(e) => setGenre(e.target.value)}
+              placeholder="上記以外を入力"
+              className="mt-3 w-full rounded-xl border border-cream-200 bg-cream-50 px-3.5 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
+            />
+          </section>
+
           {activeCount > 0 && (
             <button
               type="button"
               onClick={() =>
                 onChange({ pref: '', genre: '', q: filters.q, sort: filters.sort })
               }
-              className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
+              className="w-full rounded-full border border-cream-200 bg-white hover:bg-cream-100 text-ink-700 py-2 text-sm font-medium transition-colors"
             >
-              フィルタをクリア
+              フィルタをすべてクリア
             </button>
           )}
         </div>
