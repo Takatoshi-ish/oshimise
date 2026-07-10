@@ -103,16 +103,17 @@ export function HomeContent({
   };
 
   const openCompose = () => setComposing(true);
-  const goShop = (id: string) => {
-    // Pass viewerTeamId when we're on a team-scoped route
-    // (lockedTeamSlug === true). On "/" we omit it so the detail page's
-    // "ホームに戻る" links back to "/", preserving the default-team
-    // bookmark convention.
+  // Central helper so <Link href={…}> in ShopList and window.location in
+  // MapView pin taps use the same URL shape.
+  const buildShopHref = (id: string) => {
     const params = new URLSearchParams();
     if (viewerTeamId) params.set('viewerTeamId', viewerTeamId);
     if (lockedTeamSlug) params.set('viewerTeamSlug', lockedTeamSlug);
     const qs = params.toString() ? `?${params.toString()}` : '';
-    window.location.href = `/shops/${id}${qs}`;
+    return `/shops/${id}${qs}`;
+  };
+  const goShop = (id: string) => {
+    window.location.href = buildShopHref(id);
   };
 
   const handleViewerChange = (id: string) => {
@@ -195,6 +196,7 @@ export function HomeContent({
             shops={shops}
             loading={shopsLoading}
             onPostClick={openCompose}
+            shopHref={buildShopHref}
           />
         </div>
       </section>

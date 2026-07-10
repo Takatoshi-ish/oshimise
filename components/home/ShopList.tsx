@@ -19,6 +19,10 @@ type Props = {
   shops: ShopCard[];
   loading?: boolean;
   onPostClick?: () => void;
+  /** Callback to build the /shops/[id] URL. Lets the parent inject
+   *  viewerTeamId / viewerTeamSlug so the detail page can route back
+   *  to the correct team home. */
+  shopHref?: (id: string) => string;
 };
 
 function priceText(level: number | null): string {
@@ -40,7 +44,8 @@ function monogramTint(seed: string): string {
   return MONOGRAM_PALETTE[Math.abs(hash) % MONOGRAM_PALETTE.length];
 }
 
-export function ShopList({ shops, loading, onPostClick }: Props) {
+export function ShopList({ shops, loading, onPostClick, shopHref }: Props) {
+  const buildHref = shopHref ?? ((id: string) => `/shops/${id}`);
   if (loading) {
     return <p className="text-sm text-ink-400">読み込み中...</p>;
   }
@@ -77,7 +82,7 @@ export function ShopList({ shops, loading, onPostClick }: Props) {
         {shops.map((s) => (
           <li key={s.id}>
             <Link
-              href={`/shops/${s.id}`}
+              href={buildHref(s.id)}
               className="group block rounded-2xl bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50/30 transition-colors p-3.5 flex gap-3"
             >
               {s.thumbnailUrl ? (
