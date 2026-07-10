@@ -7,6 +7,7 @@ import {
   setTeamVisibility,
   listVisibleTeamIds,
   listAllTeams,
+  SlugTakenError,
 } from '@/lib/repositories/teams';
 import { appendTeam, fireAndForget } from '@/lib/sheets';
 
@@ -15,6 +16,13 @@ export const dynamic = 'force-dynamic';
 
 const Patch = z.object({
   name: z.string().trim().min(1).max(30).optional(),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]{3,40}$/i, {
+      message: 'slug は 3〜40文字の英数字とハイフンのみ',
+    })
+    .optional(),
   active: z.boolean().optional(),
   visibleTeamIds: z.array(z.string().uuid()).optional(),
 });
@@ -46,7 +54,23 @@ export async function PATCH(
       { status: 400 },
     );
   }
-  let updated = await updateTeam(id, parsed.data);
+  let updated;
+  try {
+    updated = await updateTeam(id, parsed.data);
+  } catch (e) {
+    if (e instanceof SlugTakenError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'VALIDATION',
+            message: 'このslugは既に他のチームで使われています',
+          },
+        },
+        { status: 400 },
+      );
+    }
+    throw e;
+  }
   if (!updated) {
     return NextResponse.json(
       { error: { code: 'NOT_FOUND', message: 'not found' } },

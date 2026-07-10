@@ -4,7 +4,8 @@ import { GENRE_SUGGESTIONS } from '@/config/data';
 
 export type Filters = {
   pref: string;
-  genre: string;
+  /** Multi-select: 0..N genres are OR'd (shop matches ANY of these). */
+  genres: string[];
   q: string;
   sort: 'new' | 'count' | 'recent_share';
 };
@@ -48,17 +49,23 @@ const FREE_TEXT_CLASS =
 
 export function FilterBar({ filters, onChange }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [newGenreText, setNewGenreText] = useState('');
   const activeCount =
-    (filters.pref ? 1 : 0) + (filters.genre ? 1 : 0);
+    (filters.pref ? 1 : 0) + filters.genres.length;
 
   const setPref = (v: string) => onChange({ ...filters, pref: v });
-  const setGenre = (v: string) => onChange({ ...filters, genre: v });
+  const addGenre = (raw: string) => {
+    const v = raw.trim();
+    if (!v || filters.genres.includes(v)) return;
+    onChange({ ...filters, genres: [...filters.genres, v] });
+  };
+  const removeGenre = (v: string) =>
+    onChange({ ...filters, genres: filters.genres.filter((g) => g !== v) });
 
   // "true" means the current pref value is one of the known options —
   // if not, we route it to the free-text input so both stay in sync.
   const knownPref =
     POPULAR_PREFS.includes(filters.pref) || OTHER_PREFS.includes(filters.pref);
-  const knownGenre = GENRE_SUGGESTIONS.includes(filters.genre);
 
   return (
     <div className="space-y-3">
@@ -175,47 +182,116 @@ export function FilterBar({ filters, onChange }: Props) {
             />
           </section>
 
-          {/* ジャンル */}
+          {/* ジャンル (multi-select "追加" style) */}
           <section className="pt-4 border-t border-cream-100">
             <div className="flex items-baseline justify-between mb-1.5">
-              <h4 className="text-sm font-bold text-ink-900">ジャンル</h4>
-              {filters.genre && (
+              <h4 className="text-sm font-bold text-ink-900">
+                ジャンル
+                {filters.genres.length > 0 && (
+                  <span className="ml-1.5 text-xs text-ink-500 font-normal">
+                    {filters.genres.length}件
+                  </span>
+                )}
+              </h4>
+              {filters.genres.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setGenre('')}
+                  onClick={() => onChange({ ...filters, genres: [] })}
                   className="text-xs text-coral-600 hover:text-coral-700 font-medium underline"
                 >
                   クリア
                 </button>
               )}
             </div>
+
+            {/* Selected genres — removable chips */}
+            {filters.genres.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {filters.genres.map((g) => (
+                  <span
+                    key={g}
+                    className="inline-flex items-center gap-1 pl-3 pr-1.5 py-1 rounded-full bg-coral-500 text-white text-xs font-semibold"
+                  >
+                    {g}
+                    <button
+                      type="button"
+                      onClick={() => removeGenre(g)}
+                      aria-label={`${g} を削除`}
+                      className="w-4 h-4 rounded-full inline-flex items-center justify-center hover:bg-coral-600 transition-colors"
+                    >
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <path d="M6 6l12 12M6 18L18 6" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Add from suggestions — resets to "" after each add */}
             <select
-              value={knownGenre ? filters.genre : ''}
-              onChange={(e) => setGenre(e.target.value)}
+              value=""
+              onChange={(e) => {
+                if (e.target.value) addGenre(e.target.value);
+              }}
               className={SELECT_CLASS}
               style={SELECT_STYLE}
             >
-              <option value="">すべて</option>
-              {GENRE_SUGGESTIONS.map((g) => (
+              <option value="">＋ ジャンルを追加</option>
+              {GENRE_SUGGESTIONS.filter(
+                (g) => !filters.genres.includes(g),
+              ).map((g) => (
                 <option key={g} value={g}>
                   {g}
                 </option>
               ))}
             </select>
-            <input
-              type="text"
-              value={knownGenre ? '' : filters.genre}
-              onChange={(e) => setGenre(e.target.value)}
-              placeholder="上記以外を入力"
-              className={`mt-2 ${FREE_TEXT_CLASS}`}
-            />
+
+            {/* Free-text add */}
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={newGenreText}
+                onChange={(e) => setNewGenreText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addGenre(newGenreText);
+                    setNewGenreText('');
+                  }
+                }}
+                placeholder="上記以外を入力してEnter"
+                className={`flex-1 ${FREE_TEXT_CLASS}`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  addGenre(newGenreText);
+                  setNewGenreText('');
+                }}
+                disabled={!newGenreText.trim()}
+                className="rounded-full bg-coral-500 hover:bg-coral-600 disabled:opacity-40 text-white px-4 text-sm font-semibold transition-colors flex-shrink-0"
+              >
+                追加
+              </button>
+            </div>
           </section>
 
           {activeCount > 0 && (
             <button
               type="button"
               onClick={() =>
-                onChange({ pref: '', genre: '', q: filters.q, sort: filters.sort })
+                onChange({ pref: '', genres: [], q: filters.q, sort: filters.sort })
               }
               className="w-full rounded-full border border-cream-200 bg-white hover:bg-cream-100 text-ink-700 py-2 text-sm font-medium transition-colors"
             >

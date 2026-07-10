@@ -24,7 +24,12 @@ const ListQuerySchema = z.object({
   pref: z.string().trim().min(1).max(30).optional().nullable(),
   city: z.string().trim().min(1).max(30).optional().nullable(),
   area: z.string().trim().min(1).max(30).optional().nullable(),
-  genre: z.string().trim().min(1).max(30).optional().nullable(),
+  // Multi-select via repeated ?genre=A&genre=B. Each entry trimmed.
+  genres: z
+    .array(z.string().trim().min(1).max(30))
+    .max(20)
+    .optional()
+    .nullable(),
   q: z.string().trim().min(1).max(100).optional().nullable(),
   sort: z.enum(['new', 'count', 'recent_share']).default('new'),
   viewerTeamId: z.string().uuid().optional().nullable(),
@@ -32,11 +37,15 @@ const ListQuerySchema = z.object({
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
+  const rawGenres = sp
+    .getAll('genre')
+    .map((g) => g.trim())
+    .filter((g) => g.length > 0);
   const parsed = ListQuerySchema.safeParse({
     pref: sp.get('pref') || null,
     city: sp.get('city') || null,
     area: sp.get('area') || null,
-    genre: sp.get('genre') || null,
+    genres: rawGenres.length > 0 ? rawGenres : null,
     q: sp.get('q') || null,
     sort: sp.get('sort') || 'new',
     viewerTeamId: sp.get('viewerTeamId') || null,
@@ -51,7 +60,11 @@ export async function GET(req: NextRequest) {
     const visibleTeamIds = parsed.data.viewerTeamId
       ? await listVisibleTeamIds(parsed.data.viewerTeamId)
       : null;
-    const cards = await listShopCards(parsed.data, parsed.data.sort, visibleTeamIds);
+    const cards = await listShopCards(
+      parsed.data,
+      parsed.data.sort,
+      visibleTeamIds,
+    );
     return NextResponse.json(cards);
   } catch (e) {
     console.error('/api/shops GET error', e);

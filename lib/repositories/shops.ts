@@ -157,7 +157,8 @@ export type ShopListFilters = {
   pref?: string | null;
   city?: string | null;
   area?: string | null;
-  genre?: string | null;
+  /** Multi-select: 0..N genres are OR'd via s.genre = ANY(...). */
+  genres?: string[] | null;
   q?: string | null;
 };
 
@@ -187,6 +188,8 @@ export async function listShopCards(
         ? '(SELECT MAX(created_at) FROM recommendations WHERE shop_id = s.id) DESC NULLS LAST, s.created_at DESC'
         : 's.created_at DESC';
   // visibility filter: when null → no filter (admin); when [] → see nothing
+  const genresArr =
+    filters.genres && filters.genres.length > 0 ? filters.genres : null;
   const r = await query<CardRow>(
     `SELECT
        s.id, s.name, s.genre, s.pref, s.city, s.area,
@@ -203,7 +206,7 @@ export async function listShopCards(
        ($1::text IS NULL OR s.pref = $1)
        AND ($2::text IS NULL OR s.city = $2)
        AND ($3::text IS NULL OR s.area = $3)
-       AND ($4::text IS NULL OR s.genre = $4)
+       AND ($4::text[] IS NULL OR s.genre = ANY($4::text[]))
        AND (
          $5::text IS NULL
          OR s.name ILIKE '%' || $5 || '%'
@@ -227,7 +230,7 @@ export async function listShopCards(
       filters.pref ?? null,
       filters.city ?? null,
       filters.area ?? null,
-      filters.genre ?? null,
+      genresArr,
       filters.q ?? null,
       visibleTeamIds,
     ],

@@ -23,6 +23,8 @@ export function TeamTable() {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editSlug, setEditSlug] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AdminTeam | null>(null);
   const [visEditing, setVisEditing] = useState<AdminTeam | null>(null);
   const [copiedTeamId, setCopiedTeamId] = useState<string | null>(null);
@@ -77,14 +79,27 @@ export function TeamTable() {
     }
   };
 
-  const handleSaveName = async (id: string) => {
+  const handleSaveEdit = async (team: AdminTeam) => {
     setBusy(true);
+    setEditError(null);
     try {
-      await fetch(`/api/admin/teams/${id}`, {
+      const body: Record<string, string> = { name: editName.trim() };
+      const trimmedSlug = editSlug.trim();
+      // Only send slug when the admin actually changed it, so slug stays
+      // untouched (and its uniqueness check is skipped) on plain rename.
+      if (trimmedSlug && trimmedSlug !== team.slug) {
+        body.slug = trimmedSlug;
+      }
+      const r = await fetch(`/api/admin/teams/${team.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editName.trim() }),
+        body: JSON.stringify(body),
       });
+      if (!r.ok) {
+        const err = await r.json().catch(() => null);
+        setEditError(err?.error?.message ?? '保存に失敗しました');
+        return;
+      }
       setEditingId(null);
       await load();
     } finally {
@@ -167,7 +182,32 @@ export function TeamTable() {
                     )}
                   </td>
                   <td className="py-2 pr-3">
-                    {urlForTeam(t) ? (
+                    {isEditing ? (
+                      t.name === DEFAULT_TEAM_NAME ? (
+                        <span className="text-xs text-ink-400">
+                          (デフォルトチームはURL固定「/」)
+                        </span>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="text-xs text-ink-500 font-mono">
+                              {origin}/t/
+                            </span>
+                            <input
+                              type="text"
+                              value={editSlug}
+                              onChange={(e) => setEditSlug(e.target.value)}
+                              placeholder="slug"
+                              pattern="[a-zA-Z0-9-]{3,40}"
+                              className="rounded border border-cream-200 px-2 py-1 text-sm font-mono w-40"
+                            />
+                          </div>
+                          <p className="text-[10px] text-ink-400">
+                            英数字とハイフン (3〜40文字)
+                          </p>
+                        </div>
+                      )
+                    ) : urlForTeam(t) ? (
                       <div className="flex items-center gap-2 min-w-0">
                         <code className="text-xs text-ink-600 bg-cream-50 border border-cream-200 rounded px-2 py-0.5 max-w-[16rem] truncate">
                           {urlForTeam(t)}
@@ -211,23 +251,33 @@ export function TeamTable() {
                   </td>
                   <td className="py-2 space-x-2 whitespace-nowrap">
                     {isEditing ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleSaveName(t.id)}
-                          disabled={busy || !editName.trim()}
-                          className="text-xs underline disabled:opacity-40"
-                        >
-                          保存
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className="text-xs underline text-ink-500"
-                        >
-                          キャンセル
-                        </button>
-                      </>
+                      <div className="space-y-1">
+                        <div className="space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEdit(t)}
+                            disabled={busy || !editName.trim()}
+                            className="text-xs underline disabled:opacity-40"
+                          >
+                            保存
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingId(null);
+                              setEditError(null);
+                            }}
+                            className="text-xs underline text-ink-500"
+                          >
+                            キャンセル
+                          </button>
+                        </div>
+                        {editError && (
+                          <p className="text-[10px] text-coral-700 whitespace-normal max-w-[10rem]">
+                            {editError}
+                          </p>
+                        )}
+                      </div>
                     ) : (
                       <>
                         <button
@@ -235,6 +285,8 @@ export function TeamTable() {
                           onClick={() => {
                             setEditingId(t.id);
                             setEditName(t.name);
+                            setEditSlug(t.slug ?? '');
+                            setEditError(null);
                           }}
                           className="text-xs underline"
                         >

@@ -14,7 +14,7 @@ import {
 
 const INITIAL_FILTERS: Filters = {
   pref: '',
-  genre: '',
+  genres: [],
   q: '',
   sort: 'recent_share',
 };
@@ -22,7 +22,8 @@ const INITIAL_FILTERS: Filters = {
 function buildShopsQS(f: Filters, viewerTeamId: string): string {
   const p = new URLSearchParams();
   if (f.pref) p.set('pref', f.pref);
-  if (f.genre) p.set('genre', f.genre);
+  // Multi-select genres — repeated ?genre=A&genre=B params.
+  for (const g of f.genres) if (g) p.append('genre', g);
   if (f.q) p.set('q', f.q);
   if (f.sort) p.set('sort', f.sort);
   if (viewerTeamId) p.set('viewerTeamId', viewerTeamId);

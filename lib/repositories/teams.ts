@@ -104,9 +104,16 @@ export async function insertTeam(name: string): Promise<Team> {
   throw new Error('failed to generate a unique slug for the new team');
 }
 
+export class SlugTakenError extends Error {
+  constructor() {
+    super('slug already in use');
+    this.name = 'SlugTakenError';
+  }
+}
+
 export async function updateTeam(
   id: string,
-  patch: { name?: string; active?: boolean },
+  patch: { name?: string; active?: boolean; slug?: string },
 ): Promise<Team | null> {
   const sets: string[] = [];
   const params: unknown[] = [];
@@ -118,14 +125,23 @@ export async function updateTeam(
     params.push(patch.active);
     sets.push(`active = $${params.length}`);
   }
+  if (typeof patch.slug === 'string') {
+    params.push(patch.slug);
+    sets.push(`slug = $${params.length}`);
+  }
   if (sets.length === 0) return findTeamById(id);
   params.push(id);
-  const r = await query<Row>(
-    `UPDATE teams SET ${sets.join(', ')} WHERE id = $${params.length}
-     RETURNING ${FIELDS}`,
-    params,
-  );
-  return r.rows[0] ? toTeam(r.rows[0]) : null;
+  try {
+    const r = await query<Row>(
+      `UPDATE teams SET ${sets.join(', ')} WHERE id = $${params.length}
+       RETURNING ${FIELDS}`,
+      params,
+    );
+    return r.rows[0] ? toTeam(r.rows[0]) : null;
+  } catch (e) {
+    if ((e as { code?: string }).code === '23505') throw new SlugTakenError();
+    throw e;
+  }
 }
 
 export type DeleteTeamResult =
