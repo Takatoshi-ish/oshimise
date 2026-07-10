@@ -14,8 +14,6 @@ type Props = {
   onChange: (next: Filters) => void;
 };
 
-// Curated "よく使う" prefectures shown as chips. The remaining prefectures are
-// reachable via the "他の都道府県 ▾" toggle so the panel stays scannable.
 const POPULAR_PREFS = [
   '東京都', '神奈川県', '埼玉県', '千葉県',
   '大阪府', '京都府', '兵庫県',
@@ -33,38 +31,34 @@ const OTHER_PREFS = [
   '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
 
-function ChipButton({
-  label,
-  selected,
-  onClick,
-}: {
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap ${
-        selected
-          ? 'bg-coral-500 text-white border-coral-500 font-semibold'
-          : 'bg-white text-ink-700 border-cream-200 hover:border-coral-300 hover:bg-coral-50'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
+const SELECT_CLASS =
+  'w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm text-ink-900 focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100 appearance-none bg-no-repeat pr-10 cursor-pointer';
+
+// SVG chevron rendered as a background image so we can hide the native
+// select arrow (which varies per OS) and keep our own on the right side.
+const SELECT_STYLE: React.CSSProperties = {
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C746A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")",
+  backgroundSize: '16px 16px',
+  backgroundPosition: 'right 12px center',
+};
+
+const FREE_TEXT_CLASS =
+  'w-full rounded-xl border border-cream-200 bg-cream-50 px-3.5 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100';
 
 export function FilterBar({ filters, onChange }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [showAllPrefs, setShowAllPrefs] = useState(false);
   const activeCount =
     (filters.pref ? 1 : 0) + (filters.genre ? 1 : 0);
 
   const setPref = (v: string) => onChange({ ...filters, pref: v });
   const setGenre = (v: string) => onChange({ ...filters, genre: v });
+
+  // "true" means the current pref value is one of the known options —
+  // if not, we route it to the free-text input so both stay in sync.
+  const knownPref =
+    POPULAR_PREFS.includes(filters.pref) || OTHER_PREFS.includes(filters.pref);
+  const knownGenre = GENRE_SUGGESTIONS.includes(filters.genre);
 
   return (
     <div className="space-y-3">
@@ -135,10 +129,10 @@ export function FilterBar({ filters, onChange }: Props) {
 
       {/* Expandable filter panel */}
       {expanded && (
-        <div className="rounded-2xl border border-cream-200 bg-white p-4 space-y-5 shadow-soft">
+        <div className="rounded-2xl border border-cream-200 bg-white p-4 space-y-4 shadow-soft">
           {/* 都道府県 */}
           <section>
-            <div className="flex items-baseline justify-between mb-2">
+            <div className="flex items-baseline justify-between mb-1.5">
               <h4 className="text-sm font-bold text-ink-900">都道府県</h4>
               {filters.pref && (
                 <button
@@ -150,51 +144,40 @@ export function FilterBar({ filters, onChange }: Props) {
                 </button>
               )}
             </div>
-            <div className="relative -mx-4">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 pb-1">
-                {(showAllPrefs
-                  ? [...POPULAR_PREFS, ...OTHER_PREFS]
-                  : POPULAR_PREFS
-                ).map((p) => (
-                  <ChipButton
-                    key={p}
-                    label={p}
-                    selected={filters.pref === p}
-                    onClick={() => setPref(filters.pref === p ? '' : p)}
-                  />
+            <select
+              value={knownPref ? filters.pref : ''}
+              onChange={(e) => setPref(e.target.value)}
+              className={SELECT_CLASS}
+              style={SELECT_STYLE}
+            >
+              <option value="">全国</option>
+              <optgroup label="よく使う">
+                {POPULAR_PREFS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => setShowAllPrefs((v) => !v)}
-                  className="flex-shrink-0 text-sm px-3 py-1.5 rounded-full border border-dashed border-cream-200 text-ink-500 hover:border-coral-300 hover:text-coral-600 transition-colors whitespace-nowrap"
-                >
-                  {showAllPrefs ? '閉じる' : '他 ▾'}
-                </button>
-              </div>
-              {/* Fade hint at right edge to indicate horizontal scroll */}
-              <div
-                className="pointer-events-none absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-white to-transparent"
-                aria-hidden
-              />
-            </div>
-            {/* Free-text fallback for anything else the chips don't cover */}
+              </optgroup>
+              <optgroup label="その他">
+                {OTHER_PREFS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
             <input
               type="text"
-              value={
-                POPULAR_PREFS.includes(filters.pref) ||
-                OTHER_PREFS.includes(filters.pref)
-                  ? ''
-                  : filters.pref
-              }
+              value={knownPref ? '' : filters.pref}
               onChange={(e) => setPref(e.target.value)}
               placeholder="上記以外を入力"
-              className="mt-3 w-full rounded-xl border border-cream-200 bg-cream-50 px-3.5 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
+              className={`mt-2 ${FREE_TEXT_CLASS}`}
             />
           </section>
 
           {/* ジャンル */}
           <section className="pt-4 border-t border-cream-100">
-            <div className="flex items-baseline justify-between mb-2">
+            <div className="flex items-baseline justify-between mb-1.5">
               <h4 className="text-sm font-bold text-ink-900">ジャンル</h4>
               {filters.genre && (
                 <button
@@ -206,29 +189,25 @@ export function FilterBar({ filters, onChange }: Props) {
                 </button>
               )}
             </div>
-            <div className="relative -mx-4">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 pb-1">
-                {GENRE_SUGGESTIONS.map((g) => (
-                  <ChipButton
-                    key={g}
-                    label={g}
-                    selected={filters.genre === g}
-                    onClick={() => setGenre(filters.genre === g ? '' : g)}
-                  />
-                ))}
-              </div>
-              <div
-                className="pointer-events-none absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-white to-transparent"
-                aria-hidden
-              />
-            </div>
-            {/* Free-text fallback */}
+            <select
+              value={knownGenre ? filters.genre : ''}
+              onChange={(e) => setGenre(e.target.value)}
+              className={SELECT_CLASS}
+              style={SELECT_STYLE}
+            >
+              <option value="">すべて</option>
+              {GENRE_SUGGESTIONS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
-              value={GENRE_SUGGESTIONS.includes(filters.genre) ? '' : filters.genre}
+              value={knownGenre ? '' : filters.genre}
               onChange={(e) => setGenre(e.target.value)}
               placeholder="上記以外を入力"
-              className="mt-3 w-full rounded-xl border border-cream-200 bg-cream-50 px-3.5 py-2 text-sm focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
+              className={`mt-2 ${FREE_TEXT_CLASS}`}
             />
           </section>
 
