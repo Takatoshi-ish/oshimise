@@ -12,5 +12,11 @@ export default async function TeamScopedHome({
   const { slug } = await params;
   const team = await findTeamBySlug(slug);
   if (!team || !team.active) notFound();
-  return <HomeContent lockedTeamId={team.id} lockedTeamName={team.name} />;
+  return (
+    <HomeContent
+      lockedTeamId={team.id}
+      lockedTeamName={team.name}
+      lockedTeamSlug={team.slug ?? undefined}
+    />
+  );
 }

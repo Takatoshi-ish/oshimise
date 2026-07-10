@@ -14,6 +14,9 @@ export default async function HomePage() {
       <HomeContent
         lockedTeamId={defaultTeam.id}
         lockedTeamName={defaultTeam.name}
+        // Note: intentionally omitting lockedTeamSlug so shop-detail
+        // navigations from "/" go back to "/" (not /t/<slug>). This
+        // preserves the "佐藤チーム bookmarks '/'" convention.
       />
     );
   }

@@ -26,6 +26,8 @@ type Props = {
   shop: Shop;
   recommendations: Recommendation[];
   photos: Photo[];
+  /** When present, the back-to-home link goes to /t/<slug> instead of "/". */
+  viewerTeamSlug?: string | null;
 };
 
 function priceText(level: number | null): string {
@@ -33,7 +35,13 @@ function priceText(level: number | null): string {
   return '¥'.repeat(Math.min(level, 4));
 }
 
-export function ShopDetail({ shop, recommendations, photos }: Props) {
+export function ShopDetail({
+  shop,
+  recommendations,
+  photos,
+  viewerTeamSlug,
+}: Props) {
+  const homeHref = viewerTeamSlug ? `/t/${viewerTeamSlug}` : '/';
   const router = useRouter();
   const [adding, setAdding] = useState(false);
 
@@ -53,7 +61,7 @@ export function ShopDetail({ shop, recommendations, photos }: Props) {
     <main className="p-4 pb-24 max-w-2xl mx-auto space-y-5">
       <div>
         <Link
-          href="/"
+          href={homeHref}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-coral-600 px-3 py-1.5 rounded-full bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50 transition-colors"
         >
           <svg

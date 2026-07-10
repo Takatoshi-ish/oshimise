@@ -1,12 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { PasscodeGate } from '@/components/admin/PasscodeGate';
 import { MemberTable } from '@/components/admin/MemberTable';
 import { ShopTable } from '@/components/admin/ShopTable';
 import { RecTable } from '@/components/admin/RecTable';
 import { TeamTable } from '@/components/admin/TeamTable';
 import { InvitationCard } from '@/components/admin/InvitationCard';
+import { AdminBackHomeButton } from '@/components/admin/AdminBackHomeButton';
 import { AppLogo } from '@/components/ui/AppLogo';
 
 type Tab = 'teams' | 'invite' | 'members' | 'shops' | 'recs';
@@ -30,25 +30,7 @@ function AdminContent() {
   return (
     <main className="p-4 max-w-6xl mx-auto">
       <div className="mb-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 hover:text-coral-600 px-3 py-1.5 rounded-full bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50 transition-colors"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          ホームに戻る
-        </Link>
+        <AdminBackHomeButton />
       </div>
       <header className="flex justify-between items-center mb-4 border-b border-cream-100 pb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2.5">

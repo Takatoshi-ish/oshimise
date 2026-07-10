@@ -38,9 +38,16 @@ type Props = {
    */
   lockedTeamId?: string;
   lockedTeamName?: string;
+  /** Present on team-scoped routes; used so shop-detail links can point
+   *  back to /t/<slug> instead of /. */
+  lockedTeamSlug?: string;
 };
 
-export function HomeContent({ lockedTeamId, lockedTeamName }: Props) {
+export function HomeContent({
+  lockedTeamId,
+  lockedTeamName,
+  lockedTeamSlug,
+}: Props) {
   const [tab, setTab] = useState<HomeTab>('list');
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [shops, setShops] = useState<ShopCard[]>([]);
@@ -97,7 +104,14 @@ export function HomeContent({ lockedTeamId, lockedTeamName }: Props) {
 
   const openCompose = () => setComposing(true);
   const goShop = (id: string) => {
-    const qs = viewerTeamId ? `?viewerTeamId=${viewerTeamId}` : '';
+    // Pass viewerTeamId when we're on a team-scoped route
+    // (lockedTeamSlug === true). On "/" we omit it so the detail page's
+    // "ホームに戻る" links back to "/", preserving the default-team
+    // bookmark convention.
+    const params = new URLSearchParams();
+    if (viewerTeamId) params.set('viewerTeamId', viewerTeamId);
+    if (lockedTeamSlug) params.set('viewerTeamSlug', lockedTeamSlug);
+    const qs = params.toString() ? `?${params.toString()}` : '';
     window.location.href = `/shops/${id}${qs}`;
   };
 
