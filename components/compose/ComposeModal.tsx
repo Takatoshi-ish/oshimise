@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { PlaceSearch, type PlaceSuggestion } from './PlaceSearch';
 import { MapPreview } from './MapPreview';
 import { PriceSelector } from './PriceSelector';
+import { GenreCombobox } from './GenreCombobox';
 import { TeamSelect } from './TeamSelect';
 import { MemberSelect } from './MemberSelect';
 import { ShareInput } from './ShareInput';
@@ -347,17 +348,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
                   setPinLng(lng);
                 }}
               />
-              <div>
-                <label className="block text-sm font-semibold text-ink-900 mb-1.5">
-                  ジャンル
-                </label>
-                <input
-                  type="text"
-                  value={genre}
-                  onChange={(e) => setGenre(e.target.value)}
-                  className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
-                />
-              </div>
+              <GenreCombobox value={genre} onChange={setGenre} />
               <div>
                 <label className="block text-sm font-semibold text-ink-900 mb-1.5">
                   エリア/沿線
