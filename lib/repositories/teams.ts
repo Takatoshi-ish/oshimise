@@ -66,6 +66,14 @@ export async function findTeamById(id: string): Promise<Team | null> {
   return r.rows[0] ? toTeam(r.rows[0]) : null;
 }
 
+export async function findTeamByName(name: string): Promise<Team | null> {
+  const r = await query<Row>(
+    `SELECT ${FIELDS} FROM teams WHERE name = $1 LIMIT 1`,
+    [name],
+  );
+  return r.rows[0] ? toTeam(r.rows[0]) : null;
+}
+
 export async function findTeamBySlug(slug: string): Promise<Team | null> {
   // slug alphabet is [a-z0-9], length 8..40 as a sanity gate before hitting DB
   if (!/^[a-z0-9]{8,40}$/.test(slug)) return null;

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
 import { ConfirmDialog } from './ConfirmDialog';
 import { TeamVisibilityDialog } from './TeamVisibilityDialog';
+import { DEFAULT_TEAM_NAME } from '@/lib/defaultTeam';
 
 export type AdminTeam = {
   id: string;
@@ -27,9 +28,13 @@ export function TeamTable() {
   const [copiedTeamId, setCopiedTeamId] = useState<string | null>(null);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const urlForTeam = (team: AdminTeam) => {
+    if (team.name === DEFAULT_TEAM_NAME) return origin;
+    return team.slug ? `${origin}/t/${team.slug}` : '';
+  };
   const copyUrl = async (team: AdminTeam) => {
-    if (!team.slug) return;
-    const url = `${origin}/t/${team.slug}`;
+    const url = urlForTeam(team);
+    if (!url) return;
     try {
       await navigator.clipboard.writeText(url);
       setCopiedTeamId(team.id);
@@ -162,10 +167,10 @@ export function TeamTable() {
                     )}
                   </td>
                   <td className="py-2 pr-3">
-                    {t.slug ? (
+                    {urlForTeam(t) ? (
                       <div className="flex items-center gap-2 min-w-0">
                         <code className="text-xs text-ink-600 bg-cream-50 border border-cream-200 rounded px-2 py-0.5 max-w-[16rem] truncate">
-                          {origin}/t/{t.slug}
+                          {urlForTeam(t)}
                         </code>
                         <button
                           type="button"

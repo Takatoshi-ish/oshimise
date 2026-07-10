@@ -1,5 +1,6 @@
-import { findTeamBySlug } from '@/lib/repositories/teams';
+import { findTeamBySlug, findTeamByName } from '@/lib/repositories/teams';
 import { JoinForm } from '@/components/join/JoinForm';
+import { DEFAULT_TEAM_NAME } from '@/lib/defaultTeam';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,14 +11,18 @@ export default async function JoinPage({
 }) {
   const { team: slug } = await searchParams;
   const requiresPasscode = !!process.env.JOIN_PASSCODE;
-  // If admins share /join?team=<slug>, resolve it server-side so the form
-  // starts with that team pre-selected. User can still change the choice.
-  const defaultTeam =
-    slug && slug.length > 0 ? await findTeamBySlug(slug) : null;
+  // Priority for the pre-selected team:
+  //   1. ?team=<slug> if present and resolvable
+  //   2. The default team (historically 佐藤チーム) so /join alone still
+  //      lands with something sensible pre-selected
+  let team = slug && slug.length > 0 ? await findTeamBySlug(slug) : null;
+  if (!team) {
+    team = await findTeamByName(DEFAULT_TEAM_NAME);
+  }
   return (
     <JoinForm
       requiresPasscode={requiresPasscode}
-      defaultTeamId={defaultTeam && defaultTeam.active ? defaultTeam.id : null}
+      defaultTeamId={team && team.active ? team.id : null}
     />
   );
 }

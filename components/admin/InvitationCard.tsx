@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { DEFAULT_TEAM_NAME } from '@/lib/defaultTeam';
 
 type Team = {
   id: string;
@@ -59,12 +60,19 @@ export function InvitationCard() {
   const origin =
     typeof window !== 'undefined' ? window.location.origin : '';
   const selectedTeam = teams.find((t) => t.id === selectedTeamId);
-  const joinUrl = selectedTeam?.slug
-    ? `${origin}/join?team=${selectedTeam.slug}`
-    : `${origin}/join`;
-  const appUrl = selectedTeam?.slug
-    ? `${origin}/t/${selectedTeam.slug}`
-    : origin;
+  // Default team gets the short URLs ("/", "/join") — every other team
+  // uses its team-scoped slug variants.
+  const isDefaultTeam = selectedTeam?.name === DEFAULT_TEAM_NAME;
+  const joinUrl = isDefaultTeam
+    ? `${origin}/join`
+    : selectedTeam?.slug
+      ? `${origin}/join?team=${selectedTeam.slug}`
+      : `${origin}/join`;
+  const appUrl = isDefaultTeam
+    ? origin
+    : selectedTeam?.slug
+      ? `${origin}/t/${selectedTeam.slug}`
+      : origin;
 
   useEffect(() => {
     setTemplate(
