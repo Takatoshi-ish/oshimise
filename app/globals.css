@@ -10,3 +10,15 @@
     font-feature-settings: 'cv11', 'ss01';
   }
 }
+
+@layer utilities {
+  /* Hide the horizontal scrollbar on chip rows across browsers.
+     Users still scroll via drag / trackpad / touch swipe. */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

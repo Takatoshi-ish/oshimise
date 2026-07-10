@@ -150,26 +150,12 @@ export function FilterBar({ filters, onChange }: Props) {
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {POPULAR_PREFS.map((p) => (
-                <ChipButton
-                  key={p}
-                  label={p}
-                  selected={filters.pref === p}
-                  onClick={() => setPref(filters.pref === p ? '' : p)}
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() => setShowAllPrefs((v) => !v)}
-                className="text-sm px-3 py-1.5 rounded-full border border-dashed border-cream-200 text-ink-500 hover:border-coral-300 hover:text-coral-600 transition-colors whitespace-nowrap"
-              >
-                {showAllPrefs ? '閉じる' : '他の都道府県 ▾'}
-              </button>
-            </div>
-            {showAllPrefs && (
-              <div className="mt-2 flex flex-wrap gap-1.5 pt-2 border-t border-cream-100">
-                {OTHER_PREFS.map((p) => (
+            <div className="relative -mx-4">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 pb-1">
+                {(showAllPrefs
+                  ? [...POPULAR_PREFS, ...OTHER_PREFS]
+                  : POPULAR_PREFS
+                ).map((p) => (
                   <ChipButton
                     key={p}
                     label={p}
@@ -177,8 +163,20 @@ export function FilterBar({ filters, onChange }: Props) {
                     onClick={() => setPref(filters.pref === p ? '' : p)}
                   />
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setShowAllPrefs((v) => !v)}
+                  className="flex-shrink-0 text-sm px-3 py-1.5 rounded-full border border-dashed border-cream-200 text-ink-500 hover:border-coral-300 hover:text-coral-600 transition-colors whitespace-nowrap"
+                >
+                  {showAllPrefs ? '閉じる' : '他 ▾'}
+                </button>
               </div>
-            )}
+              {/* Fade hint at right edge to indicate horizontal scroll */}
+              <div
+                className="pointer-events-none absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-white to-transparent"
+                aria-hidden
+              />
+            </div>
             {/* Free-text fallback for anything else the chips don't cover */}
             <input
               type="text"
@@ -208,15 +206,21 @@ export function FilterBar({ filters, onChange }: Props) {
                 </button>
               )}
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {GENRE_SUGGESTIONS.map((g) => (
-                <ChipButton
-                  key={g}
-                  label={g}
-                  selected={filters.genre === g}
-                  onClick={() => setGenre(filters.genre === g ? '' : g)}
-                />
-              ))}
+            <div className="relative -mx-4">
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-4 pb-1">
+                {GENRE_SUGGESTIONS.map((g) => (
+                  <ChipButton
+                    key={g}
+                    label={g}
+                    selected={filters.genre === g}
+                    onClick={() => setGenre(filters.genre === g ? '' : g)}
+                  />
+                ))}
+              </div>
+              <div
+                className="pointer-events-none absolute right-0 top-0 bottom-1 w-6 bg-gradient-to-l from-white to-transparent"
+                aria-hidden
+              />
             </div>
             {/* Free-text fallback */}
             <input
