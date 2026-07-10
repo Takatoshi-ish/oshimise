@@ -3,6 +3,7 @@ import { query } from '../db';
 export type Team = {
   id: string;
   name: string;
+  slug: string | null;
   active: boolean;
   createdAt: string;
 };
@@ -10,9 +11,23 @@ export type Team = {
 type Row = {
   id: string;
   name: string;
+  slug: string | null;
   active: boolean;
   created_at: string;
 };
+
+/**
+ * Generate a URL-safe unguessable slug for a new team.
+ * Uses crypto.randomUUID (available in Node 18+ / browsers) and takes
+ * the first 12 hex chars — ~48 bits of entropy, plenty for share links.
+ */
+function generateSlug(): string {
+  const raw =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID().replace(/-/g, '')
+      : Math.random().toString(36).slice(2);
+  return raw.slice(0, 12);
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -20,21 +35,24 @@ function toTeam(r: Row): Team {
   return {
     id: r.id,
     name: r.name,
+    slug: r.slug,
     active: r.active,
     createdAt: r.created_at,
   };
 }
 
+const FIELDS = 'id, name, slug, active, created_at';
+
 export async function listActiveTeams(): Promise<Team[]> {
   const r = await query<Row>(
-    'SELECT id, name, active, created_at FROM teams WHERE active = true ORDER BY name ASC',
+    `SELECT ${FIELDS} FROM teams WHERE active = true ORDER BY name ASC`,
   );
   return r.rows.map(toTeam);
 }
 
 export async function listAllTeams(): Promise<Team[]> {
   const r = await query<Row>(
-    'SELECT id, name, active, created_at FROM teams ORDER BY active DESC, name ASC',
+    `SELECT ${FIELDS} FROM teams ORDER BY active DESC, name ASC`,
   );
   return r.rows.map(toTeam);
 }
@@ -42,18 +60,40 @@ export async function listAllTeams(): Promise<Team[]> {
 export async function findTeamById(id: string): Promise<Team | null> {
   if (!UUID_RE.test(id)) return null;
   const r = await query<Row>(
-    'SELECT id, name, active, created_at FROM teams WHERE id = $1',
+    `SELECT ${FIELDS} FROM teams WHERE id = $1`,
     [id],
   );
   return r.rows[0] ? toTeam(r.rows[0]) : null;
 }
 
-export async function insertTeam(name: string): Promise<Team> {
+export async function findTeamBySlug(slug: string): Promise<Team | null> {
+  // slug alphabet is [a-z0-9], length 8..40 as a sanity gate before hitting DB
+  if (!/^[a-z0-9]{8,40}$/.test(slug)) return null;
   const r = await query<Row>(
-    'INSERT INTO teams (name) VALUES ($1) RETURNING id, name, active, created_at',
-    [name],
+    `SELECT ${FIELDS} FROM teams WHERE slug = $1`,
+    [slug],
   );
-  return toTeam(r.rows[0]);
+  return r.rows[0] ? toTeam(r.rows[0]) : null;
+}
+
+export async function insertTeam(name: string): Promise<Team> {
+  // Retry a few times on the astronomically unlikely slug collision.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const slug = generateSlug();
+    try {
+      const r = await query<Row>(
+        `INSERT INTO teams (name, slug) VALUES ($1, $2)
+         RETURNING ${FIELDS}`,
+        [name, slug],
+      );
+      return toTeam(r.rows[0]);
+    } catch (e) {
+      // 23505 = unique_violation on teams_slug_unique; try another slug
+      if ((e as { code?: string }).code === '23505' && attempt < 4) continue;
+      throw e;
+    }
+  }
+  throw new Error('failed to generate a unique slug for the new team');
 }
 
 export async function updateTeam(
@@ -74,7 +114,7 @@ export async function updateTeam(
   params.push(id);
   const r = await query<Row>(
     `UPDATE teams SET ${sets.join(', ')} WHERE id = $${params.length}
-     RETURNING id, name, active, created_at`,
+     RETURNING ${FIELDS}`,
     params,
   );
   return r.rows[0] ? toTeam(r.rows[0]) : null;

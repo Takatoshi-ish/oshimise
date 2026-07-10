@@ -9,25 +9,41 @@ type Team = { id: string; name: string };
 
 type Props = {
   requiresPasscode: boolean;
+  /** When /join?team=<slug> resolves to a real team, the team dropdown
+   *  is hidden and this id is submitted. */
+  lockedTeamId: string | null;
+  lockedTeamName: string | null;
+  /** Where the "オシミセを使ってみる" button should link after success. */
+  appUrlAfterJoin: string;
 };
 
 type Done = { id: string; name: string; teamId: string; teamName: string };
 
-export function JoinForm({ requiresPasscode }: Props) {
+export function JoinForm({
+  requiresPasscode,
+  lockedTeamId,
+  lockedTeamName,
+  appUrlAfterJoin,
+}: Props) {
   const [teams, setTeams] = useState<Team[] | null>(null);
   const [name, setName] = useState('');
-  const [teamId, setTeamId] = useState('');
+  const [teamId, setTeamId] = useState(lockedTeamId ?? '');
   const [passcode, setPasscode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
 
   useEffect(() => {
+    if (lockedTeamId) {
+      // Team is fixed by URL. Skip fetching the full list.
+      setTeams([{ id: lockedTeamId, name: lockedTeamName ?? '' }]);
+      return;
+    }
     fetch('/api/teams')
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => setTeams(Array.isArray(d) ? d : []))
       .catch(() => setTeams([]));
-  }, []);
+  }, [lockedTeamId, lockedTeamName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +70,6 @@ export function JoinForm({ requiresPasscode }: Props) {
         return;
       }
       const data = (await r.json()) as Done;
-      // Pre-populate localStorage so the user lands straight into their team's view
       saveViewerTeamId(data.teamId);
       saveLastTeam(data.teamId);
       setDone(data);
@@ -82,7 +97,7 @@ export function JoinForm({ requiresPasscode }: Props) {
             </p>
           </div>
           <Link
-            href="/"
+            href={appUrlAfterJoin}
             className="inline-block rounded-full bg-coral-500 hover:bg-coral-600 text-white px-6 py-3 text-sm font-semibold transition-colors"
           >
             オシミセを使ってみる →
@@ -100,7 +115,9 @@ export function JoinForm({ requiresPasscode }: Props) {
             メンバー登録
           </h1>
           <p className="text-sm text-ink-500 mt-1">
-            お名前と所属チームを選ぶだけで完了します
+            {lockedTeamName
+              ? `${lockedTeamName} のメンバーとして登録します`
+              : 'お名前と所属チームを選ぶだけで完了します'}
           </p>
         </div>
 
@@ -128,24 +145,35 @@ export function JoinForm({ requiresPasscode }: Props) {
                 className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
               />
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-ink-900 mb-1.5">
-                所属チーム <span className="text-coral-500">*</span>
-              </label>
-              <select
-                value={teamId}
-                onChange={(e) => setTeamId(e.target.value)}
-                required
-                className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
-              >
-                <option value="">— 選択 —</option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {lockedTeamId ? (
+              <div>
+                <label className="block text-sm font-semibold text-ink-900 mb-1.5">
+                  所属チーム
+                </label>
+                <div className="rounded-2xl border border-cream-200 bg-cream-50 px-4 py-2.5 text-base text-ink-900 font-medium">
+                  {lockedTeamName}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-semibold text-ink-900 mb-1.5">
+                  所属チーム <span className="text-coral-500">*</span>
+                </label>
+                <select
+                  value={teamId}
+                  onChange={(e) => setTeamId(e.target.value)}
+                  required
+                  className="w-full rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-base focus:border-coral-500 focus:outline-none focus:ring-2 focus:ring-coral-100"
+                >
+                  <option value="">— 選択 —</option>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {requiresPasscode && (
               <div>
                 <label className="block text-sm font-semibold text-ink-900 mb-1.5">

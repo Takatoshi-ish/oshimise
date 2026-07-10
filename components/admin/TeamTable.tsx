@@ -7,6 +7,7 @@ import { TeamVisibilityDialog } from './TeamVisibilityDialog';
 export type AdminTeam = {
   id: string;
   name: string;
+  slug: string | null;
   active: boolean;
   createdAt: string;
   memberCount: number;
@@ -23,6 +24,20 @@ export function TeamTable() {
   const [editName, setEditName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<AdminTeam | null>(null);
   const [visEditing, setVisEditing] = useState<AdminTeam | null>(null);
+  const [copiedTeamId, setCopiedTeamId] = useState<string | null>(null);
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const copyUrl = async (team: AdminTeam) => {
+    if (!team.slug) return;
+    const url = `${origin}/t/${team.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedTeamId(team.id);
+      setTimeout(() => setCopiedTeamId(null), 1500);
+    } catch {
+      /* clipboard may be blocked; user can select the text manually */
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -119,6 +134,7 @@ export function TeamTable() {
           <thead>
             <tr className="border-b border-cream-200 text-left">
               <th className="py-2 pr-3">チーム名</th>
+              <th className="py-2 pr-3">チーム専用URL</th>
               <th className="py-2 pr-3">メンバー数</th>
               <th className="py-2 pr-3">閲覧可能チーム</th>
               <th className="py-2 pr-3">状態</th>
@@ -143,6 +159,26 @@ export function TeamTable() {
                       />
                     ) : (
                       <span className="font-medium text-ink-900">{t.name}</span>
+                    )}
+                  </td>
+                  <td className="py-2 pr-3">
+                    {t.slug ? (
+                      <div className="flex items-center gap-2 min-w-0">
+                        <code className="text-xs text-ink-600 bg-cream-50 border border-cream-200 rounded px-2 py-0.5 max-w-[16rem] truncate">
+                          {origin}/t/{t.slug}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => copyUrl(t)}
+                          className="text-xs underline text-sea-600 hover:text-sea-700 flex-shrink-0"
+                        >
+                          {copiedTeamId === t.id ? 'コピー済' : 'コピー'}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-ink-400">
+                        (slug未設定)
+                      </span>
                     )}
                   </td>
                   <td className="py-2 pr-3">{t.memberCount}</td>

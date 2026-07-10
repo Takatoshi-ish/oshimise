@@ -59,6 +59,13 @@ CREATE TABLE IF NOT EXISTS teams (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Phase 2: URL-based team scoping. slug is unguessable random text used
+-- as the team's public URL segment: /t/<slug>. Nullable during migration
+-- so ADD COLUMN is safe; app-side seeder and the seed.sql below populate
+-- and then rely on the UNIQUE index.
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS slug text;
+CREATE UNIQUE INDEX IF NOT EXISTS teams_slug_unique ON teams(slug);
+
 -- 「viewer_team が visible_team の投稿を見れる」ことを表す方向性グラフ。
 -- 自分自身は常に見える(SQL側でORで処理)ので登録不要。
 CREATE TABLE IF NOT EXISTS team_visibility (

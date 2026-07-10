@@ -36,6 +36,11 @@ UPDATE members
 SET team_id = (SELECT id FROM teams WHERE name = '佐藤チーム')
 WHERE team_id IS NULL;
 
+-- slug が未設定のチームに 12文字のランダム slug を付与 (URL: /t/<slug>)
+UPDATE teams
+SET slug = substr(md5(random()::text || id::text), 1, 12)
+WHERE slug IS NULL;
+
 -- 初期 visibility: 佐藤チームは梶チームも閲覧可 (非対称展開のためのシード)
 -- 梶チームは自チームのみ(行登録不要)
 INSERT INTO team_visibility (viewer_team_id, visible_team_id)

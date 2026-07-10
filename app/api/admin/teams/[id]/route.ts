@@ -70,6 +70,7 @@ export async function PATCH(
     'admin team PATCH',
     appendTeam({
       name: updated.name,
+      slug: updated.slug,
       active: updated.active,
       visibleTeamNames: visibleNames,
       createdAt: new Date().toISOString(),

@@ -31,6 +31,9 @@ type Props = {
   existingRecommendations: Recommendation[];
   onClose: () => void;
   onAdded?: () => void;
+  /** When set (team-scoped URL), the team dropdown is hidden and members
+   *  come from this team. */
+  lockedTeamId?: string;
 };
 
 function priceText(level: number | null): string {
@@ -43,6 +46,7 @@ export function MergeView({
   existingRecommendations,
   onClose,
   onAdded,
+  lockedTeamId,
 }: Props) {
   const [memberId, setMemberId] = useState('');
   const [memberName, setMemberName] = useState('');
@@ -53,11 +57,17 @@ export function MergeView({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (lockedTeamId) {
+      setTeamId(lockedTeamId);
+      // Do NOT restore lastMember here: if it belongs to a different team the
+      // MemberSelect's <option value=id> won't be in its filtered list.
+      return;
+    }
     const last = loadLastMember();
     if (last) setMemberId(last);
     const t = loadLastTeam() ?? loadViewerTeamId() ?? '';
     if (t) setTeamId(t);
-  }, []);
+  }, [lockedTeamId]);
 
   const handleSubmit = async () => {
     if (!memberId || !comment.trim()) {
@@ -151,13 +161,15 @@ export function MergeView({
           <div className="border-t border-cream-200 pt-4">
             <h3 className="text-sm font-semibold text-ink-900 mb-3">あなたの共有を追加</h3>
             <div className="space-y-4">
-              <TeamSelect
-                value={teamId}
-                onChange={(t) => {
-                  setTeamId(t);
-                  setMemberId('');
-                }}
-              />
+              {!lockedTeamId && (
+                <TeamSelect
+                  value={teamId}
+                  onChange={(t) => {
+                    setTeamId(t);
+                    setMemberId('');
+                  }}
+                />
+              )}
               <MemberSelect
                 value={memberId}
                 onChange={(id, name) => {

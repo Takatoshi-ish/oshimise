@@ -70,9 +70,18 @@ type ComposeProps = {
   onClose: () => void;
   /** Called after a successful post or share-add so the caller can refetch. */
   onPosted?: () => void;
+  /**
+   * When present (team-scoped URL /t/[slug]), the team dropdown is hidden
+   * and the poster's team is forced to this value.
+   */
+  lockedTeamId?: string;
 };
 
-export function ComposeModal({ onClose, onPosted }: ComposeProps) {
+export function ComposeModal({
+  onClose,
+  onPosted,
+  lockedTeamId,
+}: ComposeProps) {
   const router = useRouter();
 
   const [sessionToken] = useState(() => crypto.randomUUID());
@@ -106,19 +115,30 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
       setPriceLevel(draft.priceLevel);
       setArea(draft.area);
       setGenre(draft.genre);
-      setMemberId(draft.memberId);
-      setTeamId(draft.teamId ?? loadLastTeam() ?? loadViewerTeamId() ?? '');
+      // Only restore a member from draft if it fits the locked team;
+      // otherwise the poster dropdown would show a wrong person.
+      setMemberId(lockedTeamId ? '' : draft.memberId);
+      setTeamId(
+        lockedTeamId ??
+          draft.teamId ??
+          loadLastTeam() ??
+          loadViewerTeamId() ??
+          '',
+      );
       setPhotos(draft.photos);
-      setRestored(true);
+      setRestored(!lockedTeamId);
     } else {
-      const lastM = loadLastMember();
-      if (lastM) setMemberId(lastM);
-      // Team defaults: last-used team → viewer team → blank
-      const initialTeam = loadLastTeam() ?? loadViewerTeamId() ?? '';
-      if (initialTeam) setTeamId(initialTeam);
+      if (lockedTeamId) {
+        setTeamId(lockedTeamId);
+      } else {
+        const lastM = loadLastMember();
+        if (lastM) setMemberId(lastM);
+        const initialTeam = loadLastTeam() ?? loadViewerTeamId() ?? '';
+        if (initialTeam) setTeamId(initialTeam);
+      }
     }
     setHydrated(true);
-  }, []);
+  }, [lockedTeamId]);
 
   // Persist draft on changes (skip the initial hydration cycle)
   useEffect(() => {
@@ -255,6 +275,7 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
       <MergeView
         shop={mergeShop}
         existingRecommendations={mergeRecs}
+        lockedTeamId={lockedTeamId}
         onClose={() => {
           clearDraft();
           onClose();
@@ -361,15 +382,17 @@ export function ComposeModal({ onClose, onPosted }: ComposeProps) {
                 />
               </div>
               <PriceSelector value={priceLevel} onChange={setPriceLevel} />
-              <TeamSelect
-                value={teamId}
-                onChange={(t) => {
-                  setTeamId(t);
-                  // member list changes with team → clear member to avoid
-                  // submitting a member from a different team
-                  setMemberId('');
-                }}
-              />
+              {!lockedTeamId && (
+                <TeamSelect
+                  value={teamId}
+                  onChange={(t) => {
+                    setTeamId(t);
+                    // member list changes with team → clear member to avoid
+                    // submitting a member from a different team
+                    setMemberId('');
+                  }}
+                />
+              )}
               <MemberSelect
                 value={memberId}
                 onChange={(id, name) => {

@@ -113,7 +113,7 @@ const REC_HEADERS = [
   '投稿日時',
 ];
 const MEMBER_HEADERS = ['メンバー名', 'チーム', '状態', '追加日時'];
-const TEAM_HEADERS = ['チーム名', '状態', '閲覧可能チーム', '追加日時'];
+const TEAM_HEADERS = ['チーム名', 'slug', '状態', '閲覧可能チーム', '追加日時'];
 
 export async function appendShop(shop: {
   id: string;
@@ -184,6 +184,7 @@ export async function appendMember(m: {
 
 export async function appendTeam(t: {
   name: string;
+  slug?: string | null;
   active: boolean;
   /** Names of teams this team can view (excluding self). */
   visibleTeamNames: string[];
@@ -192,6 +193,7 @@ export async function appendTeam(t: {
   await ensureTab(TEAM_TAB, TEAM_HEADERS);
   await appendRow(TEAM_TAB, [
     t.name,
+    t.slug ?? '',
     t.active ? '有効' : '無効',
     t.visibleTeamNames.length > 0 ? t.visibleTeamNames.join(', ') : '(自チームのみ)',
     t.createdAt,

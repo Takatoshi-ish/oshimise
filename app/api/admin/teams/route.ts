@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     'admin team POST',
     appendTeam({
       name: team.name,
+      slug: team.slug,
       active: team.active,
       visibleTeamNames: [],
       createdAt: team.createdAt,
