@@ -75,8 +75,9 @@ export async function findTeamByName(name: string): Promise<Team | null> {
 }
 
 export async function findTeamBySlug(slug: string): Promise<Team | null> {
-  // slug alphabet is [a-z0-9], length 8..40 as a sanity gate before hitting DB
-  if (!/^[a-z0-9]{8,40}$/.test(slug)) return null;
+  // Alphabet: alphanumeric + hyphen + underscore. Length 3..40 to match the
+  // admin edit constraint. Guards against wild input before hitting DB.
+  if (!/^[a-z0-9_-]{3,40}$/i.test(slug)) return null;
   const r = await query<Row>(
     `SELECT ${FIELDS} FROM teams WHERE slug = $1`,
     [slug],

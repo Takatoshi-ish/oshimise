@@ -19,8 +19,8 @@ const Patch = z.object({
   slug: z
     .string()
     .trim()
-    .regex(/^[a-z0-9-]{3,40}$/i, {
-      message: 'slug は 3〜40文字の英数字とハイフンのみ',
+    .regex(/^[a-z0-9_-]{3,40}$/i, {
+      message: 'slug は 3〜40文字の英数字・ハイフン(-)・アンダースコア(_)のみ',
     })
     .optional(),
   active: z.boolean().optional(),

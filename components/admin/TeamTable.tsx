@@ -198,12 +198,12 @@ export function TeamTable() {
                               value={editSlug}
                               onChange={(e) => setEditSlug(e.target.value)}
                               placeholder="slug"
-                              pattern="[a-zA-Z0-9-]{3,40}"
+                              pattern="[a-zA-Z0-9_-]{3,40}"
                               className="rounded border border-cream-200 px-2 py-1 text-sm font-mono w-40"
                             />
                           </div>
                           <p className="text-[10px] text-ink-400">
-                            英数字とハイフン (3〜40文字)
+                            英数字・ハイフン(-)・アンダースコア(_) (3〜40文字)
                           </p>
                         </div>
                       )
