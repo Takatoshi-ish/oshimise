@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       name: member.name,
       teamId: team.id,
       teamName: team.name,
+      teamSlug: team.slug,
     },
     { status: 201 },
   );

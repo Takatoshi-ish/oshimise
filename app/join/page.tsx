@@ -11,15 +11,13 @@ export default async function JoinPage({
   const { team: slug } = await searchParams;
   const requiresPasscode = !!process.env.JOIN_PASSCODE;
   // If admins share /join?team=<slug>, resolve it server-side so the form
-  // can lock the team dropdown to that team.
-  const lockedTeam =
+  // starts with that team pre-selected. User can still change the choice.
+  const defaultTeam =
     slug && slug.length > 0 ? await findTeamBySlug(slug) : null;
   return (
     <JoinForm
       requiresPasscode={requiresPasscode}
-      lockedTeamId={lockedTeam?.id ?? null}
-      lockedTeamName={lockedTeam?.name ?? null}
-      appUrlAfterJoin={lockedTeam?.slug ? `/t/${lockedTeam.slug}` : '/'}
+      defaultTeamId={defaultTeam && defaultTeam.active ? defaultTeam.id : null}
     />
   );
 }
