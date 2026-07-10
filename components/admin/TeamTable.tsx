@@ -202,8 +202,15 @@ export function TeamTable() {
                               className="rounded border border-cream-200 px-2 py-1 text-sm font-mono w-40"
                             />
                           </div>
-                          <p className="text-[10px] text-ink-400">
-                            英数字・ハイフン(-)・アンダースコア(_) (3〜40文字)
+                          <p className="text-[10px] text-ink-400 leading-relaxed whitespace-normal">
+                            英数字・ハイフン(-)・アンダースコア(_) の 3〜40文字。
+                            <br />
+                            大文字を入れても保存時に小文字化されます。URLは大小文字を区別しません
+                            (例: <code className="font-mono">kajiTeam</code> と{' '}
+                            <code className="font-mono">kajiteam</code>{' '}
+                            は同じチームに解決)。
+                            <br />
+                            slug を変更すると、旧URLは無効化されるので新URLをメンバーに再共有してください。
                           </p>
                         </div>
                       )

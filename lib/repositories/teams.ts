@@ -76,11 +76,13 @@ export async function findTeamByName(name: string): Promise<Team | null> {
 
 export async function findTeamBySlug(slug: string): Promise<Team | null> {
   // Alphabet: alphanumeric + hyphen + underscore. Length 3..40 to match the
-  // admin edit constraint. Guards against wild input before hitting DB.
-  if (!/^[a-z0-9_-]{3,40}$/i.test(slug)) return null;
+  // admin edit constraint. Slugs are stored lowercased so we normalize the
+  // input here and match case-insensitively for maximum tolerance.
+  const s = slug.toLowerCase();
+  if (!/^[a-z0-9_-]{3,40}$/.test(s)) return null;
   const r = await query<Row>(
     `SELECT ${FIELDS} FROM teams WHERE slug = $1`,
-    [slug],
+    [s],
   );
   return r.rows[0] ? toTeam(r.rows[0]) : null;
 }
@@ -127,7 +129,10 @@ export async function updateTeam(
     sets.push(`active = $${params.length}`);
   }
   if (typeof patch.slug === 'string') {
-    params.push(patch.slug);
+    // Normalize to lowercase so URL routing is case-insensitive in practice
+    // and admins can't accidentally create two teams whose slugs differ
+    // only in case ("kajiTeam" vs "kajiteam").
+    params.push(patch.slug.toLowerCase());
     sets.push(`slug = $${params.length}`);
   }
   if (sets.length === 0) return findTeamById(id);
