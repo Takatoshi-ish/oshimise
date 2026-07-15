@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/Spinner';
 import { ConfirmDialog } from './ConfirmDialog';
 import { TeamVisibilityDialog } from './TeamVisibilityDialog';
-import { DEFAULT_TEAM_NAME } from '@/lib/defaultTeam';
 
 export type AdminTeam = {
   id: string;
@@ -30,10 +29,8 @@ export function TeamTable() {
   const [copiedTeamId, setCopiedTeamId] = useState<string | null>(null);
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const urlForTeam = (team: AdminTeam) => {
-    if (team.name === DEFAULT_TEAM_NAME) return origin;
-    return team.slug ? `${origin}/t/${team.slug}` : '';
-  };
+  const urlForTeam = (team: AdminTeam) =>
+    team.slug ? `${origin}/t/${team.slug}` : '';
   const copyUrl = async (team: AdminTeam) => {
     const url = urlForTeam(team);
     if (!url) return;
@@ -183,37 +180,31 @@ export function TeamTable() {
                   </td>
                   <td className="py-2 pr-3">
                     {isEditing ? (
-                      t.name === DEFAULT_TEAM_NAME ? (
-                        <span className="text-xs text-ink-400">
-                          (デフォルトチームはURL固定「/」)
-                        </span>
-                      ) : (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1 flex-wrap">
-                            <span className="text-xs text-ink-500 font-mono">
-                              {origin}/t/
-                            </span>
-                            <input
-                              type="text"
-                              value={editSlug}
-                              onChange={(e) => setEditSlug(e.target.value)}
-                              placeholder="slug"
-                              pattern="[a-zA-Z0-9_-]{3,40}"
-                              className="rounded border border-cream-200 px-2 py-1 text-sm font-mono w-40"
-                            />
-                          </div>
-                          <p className="text-[10px] text-ink-400 leading-relaxed whitespace-normal">
-                            英数字・ハイフン(-)・アンダースコア(_) の 3〜40文字。
-                            <br />
-                            大文字を入れても保存時に小文字化されます。URLは大小文字を区別しません
-                            (例: <code className="font-mono">kajiTeam</code> と{' '}
-                            <code className="font-mono">kajiteam</code>{' '}
-                            は同じチームに解決)。
-                            <br />
-                            slug を変更すると、旧URLは無効化されるので新URLをメンバーに再共有してください。
-                          </p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="text-xs text-ink-500 font-mono">
+                            {origin}/t/
+                          </span>
+                          <input
+                            type="text"
+                            value={editSlug}
+                            onChange={(e) => setEditSlug(e.target.value)}
+                            placeholder="slug"
+                            pattern="[a-zA-Z0-9_-]{3,40}"
+                            className="rounded border border-cream-200 px-2 py-1 text-sm font-mono w-40"
+                          />
                         </div>
-                      )
+                        <p className="text-[10px] text-ink-400 leading-relaxed whitespace-normal">
+                          英数字・ハイフン(-)・アンダースコア(_) の 3〜40文字。
+                          <br />
+                          大文字を入れても保存時に小文字化されます。URLは大小文字を区別しません
+                          (例: <code className="font-mono">kajiTeam</code> と{' '}
+                          <code className="font-mono">kajiteam</code>{' '}
+                          は同じチームに解決)。
+                          <br />
+                          slug を変更すると、旧URLは無効化されるので新URLをメンバーに再共有してください。
+                        </p>
+                      </div>
                     ) : urlForTeam(t) ? (
                       <div className="flex items-center gap-2 min-w-0">
                         <code className="text-xs text-ink-600 bg-cream-50 border border-cream-200 rounded px-2 py-0.5 max-w-[16rem] truncate">

@@ -1,26 +1,80 @@
-import { findTeamByName } from '@/lib/repositories/teams';
-import { HomeContent } from '@/components/home/HomeContent';
-import { DEFAULT_TEAM_NAME } from '@/lib/defaultTeam';
+import Link from 'next/link';
+import { listActiveTeams } from '@/lib/repositories/teams';
 
 export const dynamic = 'force-dynamic';
 
-// "/" doubles as the default team's app URL (historically 佐藤チーム).
-// This keeps existing bookmarks working and gives that team a nice short
-// URL while every other team uses /t/<slug>.
-export default async function HomePage() {
-  const defaultTeam = await findTeamByName(DEFAULT_TEAM_NAME);
-  if (defaultTeam && defaultTeam.active) {
-    return (
-      <HomeContent
-        lockedTeamId={defaultTeam.id}
-        lockedTeamName={defaultTeam.name}
-        // Note: intentionally omitting lockedTeamSlug so shop-detail
-        // navigations from "/" go back to "/" (not /t/<slug>). This
-        // preserves the "佐藤チーム bookmarks '/'" convention.
-      />
-    );
-  }
-  // Fallback for setups where the default team hasn't been created yet:
-  // render the free (viewer-team switcher) view so the site still boots.
-  return <HomeContent />;
+// "/" is a plain team-picker. It intentionally does NOT render the app
+// itself — every team (including 佐藤チーム) now uses /t/<slug>. Once the
+// visitor picks a team we replace() the history entry so their back
+// button stays inside /t/<slug> rather than bouncing back here.
+export default async function LandingPage() {
+  const teams = await listActiveTeams();
+  const withSlugs = teams.filter((t) => !!t.slug);
+
+  return (
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <section className="text-center mb-8 sm:mb-10">
+        <p className="text-[11px] font-semibold tracking-widest text-coral-600 uppercase mb-2">
+          Welcome
+        </p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-ink-900 tracking-tight mb-3">
+          チームを選んでください
+        </h1>
+        <p className="text-sm text-ink-500 leading-relaxed">
+          あなたのチームのページに移動します。
+          <br />
+          以降はそのURLをブックマークしてご利用ください。
+        </p>
+      </section>
+
+      {withSlugs.length === 0 ? (
+        <div className="rounded-2xl bg-white border border-cream-100 p-6 text-center">
+          <p className="text-sm text-ink-500">
+            まだ公開されているチームがありません。
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-2.5">
+          {withSlugs.map((t) => (
+            <li key={t.id}>
+              <Link
+                href={`/t/${t.slug}`}
+                replace
+                className="flex items-center justify-between gap-3 bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50/40 rounded-2xl px-5 py-4 transition-colors group"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-ink-900 truncate">
+                    {t.name}
+                  </p>
+                  <p className="text-[11px] text-ink-400 font-mono mt-0.5 truncate">
+                    /t/{t.slug}
+                  </p>
+                </div>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-ink-300 group-hover:text-coral-500 flex-shrink-0 transition-colors"
+                  aria-hidden
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="text-xs text-ink-400 text-center mt-8 leading-relaxed">
+        この画面は「オシミセ」のトップページです。
+        <br />
+        チームメンバーの方は、招待された各チームURLを直接ご利用ください。
+      </p>
+    </main>
+  );
 }
