@@ -21,9 +21,9 @@ export default async function LandingPage() {
           チームを選んでください
         </h1>
         <p className="text-sm text-ink-500 leading-relaxed">
-          あなたのチームのページに移動します。
+          各チームごとに専用URLがあります。
           <br />
-          以降はそのURLをブックマークしてご利用ください。
+          遷移後はそのURLをブックマークしてご利用ください。
         </p>
       </section>
 
@@ -42,14 +42,9 @@ export default async function LandingPage() {
                 replace
                 className="flex items-center justify-between gap-3 bg-white border border-cream-100 hover:border-coral-200 hover:bg-coral-50/40 rounded-2xl px-5 py-4 transition-colors group"
               >
-                <div className="min-w-0">
-                  <p className="font-semibold text-ink-900 truncate">
-                    {t.name}
-                  </p>
-                  <p className="text-[11px] text-ink-400 font-mono mt-0.5 truncate">
-                    /t/{t.slug}
-                  </p>
-                </div>
+                <p className="font-semibold text-ink-900 truncate min-w-0">
+                  {t.name}
+                </p>
                 <svg
                   width="18"
                   height="18"
